@@ -613,6 +613,42 @@ def export_excel():
         return render_template("404.html")
 
 
+@app.route("/user/read_excel/circular" , methods=["POST"])
+def read_excel_cicular():
+    excel_file = request.files["excel_file"]
+    if clear():
+        try:
+            df  = pd.read_csv(excel_file)
+            for index,(Number,Name,Address,Latitude,Longitude) in df.iterrows():
+                db = pymysql.connect(host=config.DB_HOST,
+                    user=config.DB_USER,
+					passwd=config.DB_PASSWORD,
+					db=config.DB,
+					port=config.DB_PORT,
+					charset='utf8',
+					use_unicode=True)
+                cur = db.cursor()
+                query = "INSERT INTO map VALUES( %s , %s , %s , %s , %s )"
+                cur.execute(query , 
+					(Number,Name,Address,Latitude,Longitude))
+                db.commit()
+                db.close()
+            return Response(f"""<body style='background-color:white;'>
+						<center>
+						<h2 style='color:red;'>Done</h2>
+						<h1>Excel File Saved Successfuly in Database</h1>
+						<a href='/'><button>Home</button></a>
+						</center>
+						</body>""")
+
+        except:
+            return Response(f"""<body style='background-color:white;'>
+						<center>
+						<h2 style='color:red;'>ERROR</h2>
+                            <h1 style='color:red;'>Error File Saving in Database</h1>
+						<a href='/'><button>Home</button></a>
+						</center>
+						</body>""")
 
 
     
