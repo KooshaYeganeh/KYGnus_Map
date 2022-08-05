@@ -131,4 +131,3 @@ dmypy.json
 test.py
 mysql_test.py
 *.swp
-*.log
