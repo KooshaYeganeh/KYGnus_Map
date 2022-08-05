@@ -1,0 +1,97 @@
+#!/usr/bin/bash
+
+
+user=`users | cut -d" " -f1`
+
+APP_DIR=/home/$user/Apps
+if [ -d "$APP_DIR" ]; then
+    true
+else
+    mkdir /home/$user/Apps
+fi
+
+cd /home/$user/Apps
+
+mkdir KYGnus_Map
+cd KYGnus_Map
+
+sudo pip install virtualenv
+
+source venv/bin/activate
+
+sudo pip install -r requirements.txt
+
+
+
+
+this_dir=`pwd`
+
+
+echo -e "[Unit]\nDescription=App with Web UI to working Maps and Data\n\n[Service]\nType=simple\nExecStart=/bin/bash\s$this_dir/KYGnus_Map.sh\n\n[Install]\nWantedBy=multi-user.target" > KYGnus_Map.service
+
+sudo cp KYGnus_Map.service /etc/systemd/system
+
+sudo systemctl enable --now KYGnus_Map.service
+
+sudo systemctl start KYGnus_Map.service
+
+
+
+cd /etc
+
+sudo mkdir KYGnus_Map
+
+cd KYGnus_Map
+
+ln -s /home/$user/Apps/KYGnus_Map/config.py KYGnus_Map.conf
+
+cd
+
+
+
+cd /var/log
+
+sudo mkdir KYGnus_Map
+
+cd KYGnus_Map
+
+ln -s /home/$user/Apps/KYGnus_Map/KYGnus_Map.log KYGnus_Map.log
+
+cd
+
+
+
+
+sudo iptables -A INPUT -i enp0s1 -p tcp -m multiport ! --dport 22,80,443,8080 -j REJECT
+sudo iptables -A INPUT -i enp1s0 -p tcp ! --syn -m state --state NEW -j DROP
+sudo iptables -A INPUT -i enp1s0 -p tcp -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+sudo iptables -A OUTPUT -o enp1s0 -p tcp -m multiport --sport 22,80,443 -j ACCEPT
+
+sudo iptables -A INPUT -i enp1s0 -p tcp --tcp-flags ALL NONE -j DROP
+
+sudo iptables -A INPUT -i enp1s0 -p tcp --tcp-flags PSH,URG,FIN PSH,URG,FIN -j REJECT
+
+sudo iptables -A INPUT -p tcp -m state --state INVALID -j DROP
+
+sudo iptables -A INPUT -p tcp -m connlimit --connlimit-above 100 -j DROP
+
+sudo iptables -A INPUT -f -j DROP
+
+sudo iptables -A INPUT -p icmp --icmp-type 8 -j DROP
+
+sudo iptables -A INPUT -p icmp --icmp-type 13 -j DROP
+
+sudo iptables -A INPUT -p icmp --icmp-type 14 -j DROP
+
+sudo iptables -A INPUT -i enp1s0 -p tcp --syn -m limit --limit 100/minute --limit-burst 80 -j DROP
+
+sudo iptables -P INPUT DROP
+
+sudo iptables -P OUTPUT DROP
+
+
+
+
+
+
