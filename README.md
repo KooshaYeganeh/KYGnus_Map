@@ -6,7 +6,7 @@ Easly Create Map and Some Other Features
 
 # basic Requirements
 
-1- Linux : I Test App in **Fedora35** and **Ubuntu22** <br />
+1- Linux : I Test App in **Fedora35** and **Ubuntu22.04** <br />
 2- MariaDB <br />
 3- Python & pip <br />
 
