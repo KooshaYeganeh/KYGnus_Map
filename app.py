@@ -45,6 +45,19 @@ logger = logging.getLogger()  # Create Logger of Logging System
 
 logger.setLevel(logging.DEBUG)  # Set Level For Logger
 
+logger.info(Fore.GREEN + """
+
+██╗  ██╗██╗   ██╗ ██████╗ ███╗   ██╗██╗   ██╗███████╗        ███╗   ███╗ █████╗ ██████╗ ██████╗ ███████╗██████╗
+██║ ██╔╝╚██╗ ██╔╝██╔════╝ ████╗  ██║██║   ██║██╔════╝        ████╗ ████║██╔══██╗██╔══██╗██╔══██╗██╔════╝██╔══██╗
+█████╔╝  ╚████╔╝ ██║  ███╗██╔██╗ ██║██║   ██║███████╗        ██╔████╔██║███████║██████╔╝██████╔╝█████╗  ██████╔╝
+██╔═██╗   ╚██╔╝  ██║   ██║██║╚██╗██║██║   ██║╚════██║        ██║╚██╔╝██║██╔══██║██╔═══╝ ██╔═══╝ ██╔══╝  ██╔══██╗
+██║  ██╗   ██║   ╚██████╔╝██║ ╚████║╚██████╔╝███████║███████╗██║ ╚═╝ ██║██║  ██║██║     ██║     ███████╗██║  ██║
+╚═╝  ╚═╝   ╚═╝    ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝ ╚══════╝╚══════╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝     ╚══════╝╚═╝  ╚═╝
+
+
+
+            """)
+
 
 # connect to MariaDB
 
@@ -183,7 +196,7 @@ else:
 
 
 # check number of Tables in mapper
-""" This Functions check Files and Database and return valid Data 
+""" This Functions check Files and Database and return valid Data
 for showing information in Index Page"""
 
 
@@ -288,20 +301,20 @@ class User(UserMixin):
 user = User(0)
 
 
-@app.route("/")
-@login_required
+@ app.route("/")
+@ login_required
 def loogin():
     return render_template("index.html")
 
 
-@app.route("/login")
+@ app.route("/login")
 def login():
     return render_template("login.html")
 
 
-@app.route("/login", methods=["POST"])
+@ app.route("/login", methods=["POST"])
 # This Limits Requests to Prevent BruteForce Attack
-@limiter.limit("5 per minutes")
+@ limiter.limit("5 per minutes")
 def loggin():
     username = request.form["username"]
     password = request.form["password"]
@@ -320,21 +333,21 @@ def loggin():
         return redirect("/login")
 
 
-@app.route("/logout")
-@login_required
+@ app.route("/logout")
+@ login_required
 def logout():
     logout_user()
     logger.info(Fore.YELLOW + "[ INFO ] user logout")
     return Response('<p>Logged out</p>')
 
 
-@app.errorhandler(401)
+@ app.errorhandler(401)
 def page_not_found(e):
     logger.warning(Fore.RED + "[ Warning ] 401 Error")
     return Response('<center><h1>Login Failed</h1><center>')
 
 
-@login_manager.user_loader
+@ login_manager.user_loader
 def load_user(userid):
     return User(userid)
 
@@ -347,7 +360,7 @@ def check_files(filename):
     return "." in filename and filename.rsplit(".", 1)[1] in allowed_formats
 
 
-@app.route("/createmap")
+@ app.route("/createmap")
 def createmap():
     logger.info(Fore.CYAN + "[ Info ] Loading Create Map Page")
     return render_template("createmap.html")
@@ -357,7 +370,7 @@ def createmap():
 This Will be Get Lat and Long and Create Map in That Locations"""
 
 
-@app.route("/createmap/createmainmap")
+@ app.route("/createmap/createmainmap")
 def create_main_map():
     logger.info(Fore.CYAN + "[ Info ] Loading Create Map Page")
     return render_template("main_map_creator.html")
@@ -368,7 +381,7 @@ def create_main_map():
 This is Basic map with No Marker"""
 
 
-@app.route("/createmap/createmainmap", methods=["POST"])
+@ app.route("/createmap/createmainmap", methods=["POST"])
 def main_map():
     lat = request.form["lat"]
     lan = request.form["lan"]
@@ -388,7 +401,7 @@ def main_map():
 This is Basic map with Marker and Save File in templates Directory in templates/maps"""
 
 
-@app.route("/createmap/map/marker", methods=["POST"])
+@ app.route("/createmap/map/marker", methods=["POST"])
 def marker():
     """ This route get excel File and insert marker on map"""
     csv_file = request.files["csv_file"]
@@ -417,7 +430,7 @@ def marker():
 """ This Route Make marker in Circular Mode and Save Map in template/maps Directory"""
 
 
-@app.route("/createmap/map/circular-maker",  methods=["POST"])
+@ app.route("/createmap/map/circular-maker",  methods=["POST"])
 def cmarker():
     """ at this route and Function  make curcular maker to map.first Get excwl File and
     make sure this File is Safe and after that save it in excelpath"""
@@ -449,7 +462,7 @@ def cmarker():
 and Their Link Can Download Data or Use Informations of This Sites"""
 
 
-@app.route("/related")
+@ app.route("/related")
 def related():
     logger.info(Fore.YELLOW + "[ Info ] Get related template")
     return render_template("related.html")
@@ -465,13 +478,13 @@ def related():
 """
 
 
-@app.route("/extensions")
+@ app.route("/extensions")
 def extensions_get():
     logger.info(Fore.YELLOW + "[ Info ] Get extensions template")
     return render_template("extensions.html")
 
 
-@app.route("/extensions/fs", methods=["POST"])
+@ app.route("/extensions/fs", methods=["POST"])
 def extensions_fs():
     opt = os.popen("cd /opt").read()
     mainzip = os.popen(
@@ -482,20 +495,66 @@ def extensions_fs():
     cd = os.popen("cd").read()
     print(opt, mainzip, unzip, fs, usr_bin, cd)
     logger.info(Fore.YELLOW + "[ Info ] FS App installed")
-    return render_template("success.html")
+    return Response("""<html style='background-color:#FFFACD;'><body>
+                    <center>
+                    <h3 style='color: #696969;'> KYGnus Fs </h3>
+                    <h1 style='color: #696969 ; '> KYGnus Fs Installed Successfully</h1>
+                    <h2> This App installed From Github</h2>
+					 <img src='./static/GitHub-Mark-120px-plus.png' alt='Github' width="200" height="200">
+					<div style='margin-top:20px;'>
+					<a href='/main'><button class='return' style='background-color:#98FB98;
+  border: none;
+  color: black;
+  padding: 10px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;'>
+  Return</button></a>
+     </div>
+     </center>
+     </body>
+     </center>
+                    """)
 
 
-@app.route("/extensions/clamav", methods=["POST"])
+@ app.route("/extensions/clamav", methods=["POST"])
 def clamav_install():
     update = os.popen("sudo apt update -y").read()
     install = os.popen("sudo apt-get install clamav clamav-daemon -y").read()
     updatedb = os.popen("sudo freshclam").read()
     print(update, install, updatedb)
     logger.info(Fore.YELLOW + "[ Info ] clamAV Installed")
-    return render_template("success.html")
+    return Response("""<html style='background-color:black;'><body>
+                    <center>
+                    <h3 style='color: #B22222;'> ClamAV </h3>
+                    <h1 style='color: #B22222 ; '> ClamAV Installed Successfully</h1>
+                    <h2 style='color: #B22222 ; '> This App installed From Repository</h2>
+					 <img src='./static/clamav.png' alt='Github' width="250" height="250">
+					<div style='margin-top:20px;'>
+					<a href='/main'><button class='return' style='background-color:#FF4500;
+  border: none;
+  color: white;
+  padding: 10px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;'>
+  Return</button></a>
+     </div>
+     </center>
+     </body>
+     </center>
+                    """)
 
 
-@app.route("/extensions/maldet", methods=["POST"])
+@ app.route("/extensions/maldet", methods=["POST"])
 def maldet():
     update = os.popen("sudo apt update -y").read()
     chdir = os.popen("cd /tmp").read()
@@ -506,30 +565,99 @@ def maldet():
     install = os.popen("./install").read()
     print(update, chdir, getfile, unzip, chmaldet, install)
     logger.info(Fore.YELLOW + "[ Info ] maldet Installed")
-    return render_template("success.html")
+    return Response("""<html style='background-color:black;'><body>
+                    <center>
+                    <h3 style='color: #B22222;'> Maldet </h3>
+                    <h1 style='color: #B22222 ; '> Malware Detect Installed Successfully</h1>
+                    <h2 style='color: #B22222 ; '> This App installed From Repository</h2>
+					 <img src='./static/clamav.png' alt='Github' width="250" height="250">
+					<div style='margin-top:20px;'>
+					<a href='/main'><button class='return' style='background-color:#FF4500;
+  border: none;
+  color: white;
+  padding: 10px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;'>
+  Return</button></a>
+     </div>
+     </center>
+     </body>
+     </center>
+                    """)
 
 
-@app.route("/extensions/rkhunter", methods=["POST"])
+@ app.route("/extensions/rkhunter", methods=["POST"])
 def rkhunter():
     update = os.popen("sudo apt update -y").read()
     install = os.popen("sudo apt install rkhunter -y").read()
     print(update, install)
     logger.info(Fore.YELLOW + "[ Info ] RootKit Hunter Installed")
-    return render_template("success.html")
+    return Response("""<html style='background-color:#A9A9A9;'><body>
+                    <center>
+                    <h3 style='color: black;'> RKHunter </h3>
+                    <h1 style='color: #696969 ; '> RKhunter Installed Successfully</h1>
+                    <h2> This App installed From Repository</h2>
+					 <img src='./static/Linux+security_rkhunter.jpg' alt='Github' width="500" height="300">
+					<div style='margin-top:20px;'>
+					<a href='/main'><button class='return' style='background-color:#98FB98;
+  border: none;
+  color: black;
+  padding: 10px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;'>
+  Return</button></a>
+     </div>
+     </center>
+     </body>
+     </center>
+                    """)
 
 
-@app.route("/extensions/lynis", methods=["POST"])
+@ app.route("/extensions/lynis", methods=["POST"])
 def lynis():
     update = os.popen("sudo apt update -y").read()
     install = os.popen.read("sudo apt install lynis").read()
     print(update, install)
     logger.info(Fore.YELLOW + "[ Info ] Lynis Installed")
-    return render_template("success.html")
-
+    return Response("""<html style='background-color:#A9A9A9;'><body>
+                    <center>
+                    <h3 style='color: #FF4500;'> Lynis </h3>
+                    <h1 style='color: #696969 ; '> Lynis Installed Successfully</h1>
+                    <h2> This App installed From Repository</h2>
+					 <img src='./static/lynis.svg' alt='Github' width="500" height="300">
+					<div style='margin-top:20px;'>
+					<a href='/main'><button class='return' style='background-color:#FF4500;
+  border: none;
+  color: black;
+  padding: 10px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;'>
+  Return</button></a>
+     </div>
+     </center>
+     </body>
+     </center>
+                    """)
 
 # Admin
 
-@app.route("/user")
+
+@ app.route("/user")
 def admin():
     logger.info(Fore.YELLOW + "[ Info ] Admin Dashboard Loaded")
     return render_template("login_admin.html")
@@ -537,8 +665,8 @@ def admin():
 # Login Admin
 
 
-@app.route("/user", methods=["POST"])
-@limiter.limit("3 per minutes")
+@ app.route("/user", methods=["POST"])
+@ limiter.limit("3 per minutes")
 def admin_login():
     admin_username = request.form["admin_username"]
     admin_password = request.form["admin_password"]
@@ -578,7 +706,7 @@ def admin_login():
 """at This Route read csv File and try to save it in MYSQL"""
 
 
-@app.route("/user/csvtomtsql", methods=["POST"])
+@ app.route("/user/csvtomtsql", methods=["POST"])
 def csvtomtsql():
     # read csv file and save it in mysql
     # csvfile = request.files["csv_file"]
@@ -611,7 +739,7 @@ def csvtomtsql():
         return Response("<center><h2 > ERROR  </h2></br><p>Please Check File or MariaDB Columns ...</p></br><h1>Cant't Insert data to MariaDB !!!</h1></center>")
 
 
-@app.route("/user/db/search", methods=["POST"])
+@ app.route("/user/db/search", methods=["POST"])
 def Search_db():
     jostoju = request.form["search"]
     logger.info(Fore.YELLOW + "[ Info ] user Start to Search ans asnad")
@@ -623,7 +751,7 @@ def Search_db():
     return render_template("search_result_asnad.html", data=data1)
 
 
-@app.route("/user/db/remove", methods=["POST"])
+@ app.route("/user/db/remove", methods=["POST"])
 def remove_db():
     try:
         locname = request.form["name"]
@@ -640,7 +768,7 @@ def remove_db():
         return render_template("404.html")
 
 
-@app.route("/user/db/backup", methods=["POST"])
+@ app.route("/user/db/backup", methods=["POST"])
 def db_backup():
     try:
         logger.info(
@@ -682,7 +810,7 @@ def db_backup():
                         </body></html>""")
 
 
-@app.route("/user/db/export2excel", methods=["POST"])
+@ app.route("/user/db/export2excel", methods=["POST"])
 def export_excel():
     try:
         user = config.DB_USER  # your username
@@ -707,7 +835,7 @@ def export_excel():
         return render_template("404.html")
 
 
-@app.route("/user/read_excel/circular", methods=["POST"])
+@ app.route("/user/read_excel/circular", methods=["POST"])
 def read_excel_cicular():
     excel_file = request.files["excel_file"]
     try:
@@ -744,7 +872,7 @@ def read_excel_cicular():
 						< / body > """)
 
 
-@app.route("/user/read_excel/marker", methods=["POST"])
+@ app.route("/user/read_excel/marker", methods=["POST"])
 def read_excel_marker():
     excel_file = request.files["excel_file"]
     try:
@@ -782,7 +910,7 @@ def read_excel_marker():
 
 
 # logs
-@app.route("/user/logs")
+@ app.route("/user/logs")
 def logs():
     with open("KYGnus_Map.log", "r") as log_file:
         log_read = log_file.readlines()
@@ -794,7 +922,7 @@ def logs():
 """ Create Minimal Documents For app in Html Style """
 
 
-@app.route("/documentation")
+@ app.route("/documentation")
 def document():
     logger.info(Fore.YELLOW + "[ Info ] user Start to View Documentation")
     return render_template("Documentation.html")
@@ -803,7 +931,7 @@ def document():
 # TODO : create log template
 
 
-@app.route("/analyzer")
+@ app.route("/analyzer")
 def analyzer():
     logger.info(Fore.YELLOW + "[ Info ]  Analyzer template Loaded")
     return render_template("analyzer.html")
@@ -813,7 +941,7 @@ def analyzer():
 # TODO : check Document File Type and Format and Extensions and Interior of File for Unwanted Data
 
 
-@app.route("/analyzer/files", methods=["POST"])
+@ app.route("/analyzer/files", methods=["POST"])
 def post_document_analyzer():
    # logger.info(Fore.YELLOW + "[ Info ]  User start to Analyze Document")
     path = request.form["docfile"]
@@ -835,7 +963,7 @@ def post_document_analyzer():
 
 
 # maps
-@app.route("/maps")
+@ app.route("/maps")
 def maps():
     logger.info("system File Manager is Loaded in maps Directory")
     maps = os.popen(
