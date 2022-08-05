@@ -1,8 +1,8 @@
 # KYGnus_Mapper
 Easly Create Map and Some Other Features
 
-![alt text](./KYGnus_Map.png)
-![alt text](./KYGnus_Map_Extensions.png)
+![Screenshot](KYGnus_Map.png)
+![Screenshot](KYGnus_Map_Extensions.png)
 
 # basic Requirements
 
