@@ -35,116 +35,235 @@ from pathlib import Path
 app = Flask(__name__)
 
 
-
-""" Define Basic Configs of Logging.This Bsic Configs have Time and 
+""" Define Basic Configs of Logging.This Bsic Configs have Time and
 Message and FileMode"""
 logging.basicConfig(filename="KYGnus_Map.log",
                     format='%(asctime)s %(message)s',
                     filemode='w')
 
-logger = logging.getLogger() # Create Logger of Logging System
+logger = logging.getLogger()  # Create Logger of Logging System
 
-logger.setLevel(logging.DEBUG) # Set Level For Logger
+logger.setLevel(logging.DEBUG)  # Set Level For Logger
 
 
-## connect to MariaDB
+# connect to MariaDB
 
 try:
     logger.info(Fore.YELLOW + "[ INFO ] connecting to database")
     db = pymysql.connect(host=config.DB_HOST,
-						user=config.DB_USER,
-						passwd=config.DB_PASSWORD,
-						db=config.DB,
-						port=config.DB_PORT,
-						charset='utf8',
-						use_unicode=True)
+                         user=config.DB_USER,
+                         passwd=config.DB_PASSWORD,
+                         db=config.DB,
+                         port=config.DB_PORT,
+                         charset='utf8',
+                         use_unicode=True)
 except:
     logger.warning(Fore.YELLOW + "[ Warning ] Could not connect to database")
     print("ERROR on connecting to mariaDB")
 
 
-
-username=getpass.getuser() # Get username of system
-logger.info(Fore.YELLOW + f"[ INFO ] Get username of system: This Username is {username}")
+username = getpass.getuser()  # Get username of system
+logger.info(
+    Fore.YELLOW + f"[ INFO ] Get username of system: This Username is {username}")
 
 
 # Create Directory For App
 appdir = os.path.join(f"/home/{username}/KYGnus_Map")
-os.makedirs(appdir,exist_ok=True)
+os.makedirs(appdir, exist_ok=True)
 logger.info(Fore.YELLOW + "[ INFO ] App Create Directory in Home of username")
-
 
 
 # Create Directory For Filed in App Directory
 """ make Directory For Files in user Direcory If Exist pass it"""
-Filespath = os.path.join(f"/home/{username}/KYGnus_Map/Files") 
-os.makedirs(Filespath,exist_ok=True) 
-logger.info(Fore.YELLOW + f"[ INFO ] Making Directory for Files in /home/{username}/KYGnus_Map")
-
-
+Filespath = os.path.join(f"/home/{username}/KYGnus_Map/Files")
+os.makedirs(Filespath, exist_ok=True)
+logger.info(Fore.YELLOW +
+            f"[ INFO ] Making Directory for Files in /home/{username}/KYGnus_Map")
 
 
 """ make Directory For  Excel Files in user Direcory If Exist pass it"""
-excel_files_path = os.path.join(f"/home/{username}/KYGnus_Map/Files/Excel") 
-os.makedirs(excel_files_path,exist_ok=True) 
-logger.info(Fore.YELLOW + f"[ INFO ] Making Directory for Excel Files in /home/{username}/KYGnus_Map/Files")
+excel_files_path = os.path.join(f"/home/{username}/KYGnus_Map/Files/Excel")
+os.makedirs(excel_files_path, exist_ok=True)
+logger.info(Fore.YELLOW +
+            f"[ INFO ] Making Directory for Excel Files in /home/{username}/KYGnus_Map/Files")
 
 
 """ make Directory For CIrcular Markger Excel Files in user Direcory If Exist pass it"""
-excel_marker_files_path = os.path.join(f"/home/{username}/KYGnus_Map/Files/Excel/marker") 
-os.makedirs(excel_marker_files_path,exist_ok=True) 
-logger.info(Fore.YELLOW + f"[ INFO ] Making Directory for Excel Files in /home/{username}/KYGnus_Map/Files")
+excel_marker_files_path = os.path.join(
+    f"/home/{username}/KYGnus_Map/Files/Excel/marker")
+os.makedirs(excel_marker_files_path, exist_ok=True)
+logger.info(Fore.YELLOW +
+            f"[ INFO ] Making Directory for Excel Files in /home/{username}/KYGnus_Map/Files")
 
 """ make Directory For circular marker Excel Files in user Direcory If Exist pass it"""
-excel_cmarker_files_path = os.path.join(f"/home/{username}/KYGnus_Map/Files/Excel/circular") 
-os.makedirs(excel_cmarker_files_path,exist_ok=True) 
-logger.info(Fore.YELLOW + f"[ INFO ] Making Directory for Excel Files in /home/{username}/KYGnus_Map/Files")
-
-
+excel_cmarker_files_path = os.path.join(
+    f"/home/{username}/KYGnus_Map/Files/Excel/circular")
+os.makedirs(excel_cmarker_files_path, exist_ok=True)
+logger.info(Fore.YELLOW +
+            f"[ INFO ] Making Directory for Excel Files in /home/{username}/KYGnus_Map/Files")
 
 
 """ make Directory For doc Files in user Direcory If Exist pass it"""
-doc_files_path = os.path.join(f"/home/{username}/KYGnus_Map/Files/Documents") 
-os.makedirs(doc_files_path,exist_ok=True) 
-logger.info(Fore.YELLOW + f"[ INFO ] Making Directory for doc Files in /home/{username}/KYGnus_Map/Files")
-
-
+doc_files_path = os.path.join(f"/home/{username}/KYGnus_Map/Files/Documents")
+os.makedirs(doc_files_path, exist_ok=True)
+logger.info(Fore.YELLOW +
+            f"[ INFO ] Making Directory for doc Files in /home/{username}/KYGnus_Map/Files")
 
 
 """ make Directory For Files in user Direcory If Exist pass it"""
-backup_path = os.path.join(f"/home/{username}/KYGnus_Map/Files/Backup") 
-os.makedirs(backup_path,exist_ok=True) 
-logger.info(Fore.YELLOW + f"[ INFO ] Making Directory for doc Files in /home/{username}/KYGnus_Map/Files/Backup")
-
+backup_path = os.path.join(f"/home/{username}/KYGnus_Map/Files/Backup")
+os.makedirs(backup_path, exist_ok=True)
+logger.info(Fore.YELLOW +
+            f"[ INFO ] Making Directory for doc Files in /home/{username}/KYGnus_Map/Files/Backup")
 
 
 """ make Directory For DB Backup Files in user Direcory If Exist pass it"""
-db_backup_path = os.path.join(f"/home/{username}/KYGnus_Map/Files/Backup/DB") 
-os.makedirs(db_backup_path,exist_ok=True) 
-logger.info(Fore.YELLOW + f"[ INFO ] Making Directory for doc Files in /home/{username}/KYGnus_Map/Files/Backup/DB")
+db_backup_path = os.path.join(f"/home/{username}/KYGnus_Map/Files/Backup/DB")
+os.makedirs(db_backup_path, exist_ok=True)
+logger.info(Fore.YELLOW +
+            f"[ INFO ] Making Directory for doc Files in /home/{username}/KYGnus_Map/Files/Backup/DB")
 
 
+def check_db():
+    db = pymysql.connect(host=config.DB_HOST,
+                         user=config.DB_USER,
+                         passwd=config.DB_PASSWORD,
+                         db=config.DB,
+                         port=config.DB_PORT,
+                         charset='utf8',
+                         use_unicode=True)
+    cur = db.cursor()
+    cur.execute("SHOW TABLES")
+    data = cur.fetchall()
+    db.close()
+    return data
 
-""" make Directory For system Backup Files in user Direcory If Exist pass it"""
-sysfile_backup_path = os.path.join(f"/home/{username}/KYGnus_Map/Files/Backup/System") 
-os.makedirs(sysfile_backup_path,exist_ok=True) 
-logger.info(Fore.YELLOW + f"[ INFO ] Making Directory for doc Files in /home/{username}/KYGnus_Map/Files/Backup/")
+
+if re.search("map_circular", str(check_db())):
+    logger.info(Fore.CYAN + "[ DB_check ] =>  map_circular Table is Exists")
+else:
+    db = pymysql.connect(host=config.DB_HOST,
+                         user=config.DB_USER,
+                         passwd=config.DB_PASSWORD,
+                         db=config.DB,
+                         port=config.DB_PORT,
+                         charset='utf8',
+                         use_unicode=True)
+    cur = db.cursor()
+    cur.execute(
+        """CREATE TABLE map_circular (Number VARCHAR(100) , Name VARCHAR(1000),
+        Address VARCHAR(1000),
+        Longitude VARCHAR(500) ,
+        Latitude VARCHAR(500))
+""")
+    db.close()
+    logger.info(
+        Fore.YELLOW + " [ DB_check ] => map_circular Table Created in Mapper Database")
 
 
+if re.search("map_marker", str(check_db())):
+    logger.info(Fore.CYAN + "[ DB_check ] =>  map_marker Table is Exists")
+else:
+    db = pymysql.connect(host=config.DB_HOST,
+                         user=config.DB_USER,
+                         passwd=config.DB_PASSWORD,
+                         db=config.DB,
+                         port=config.DB_PORT,
+                         charset='utf8',
+                         use_unicode=True)
+    cur = db.cursor()
+    cur.execute("""CREATE TABLE map_marker(Number VARCHAR(100) , Name VARCHAR(1000),
+        Address VARCHAR(1000),
+        Longitude VARCHAR(500) ,
+        Latitude VARCHAR(500))
+""")
+    db.close()
+    logger.info(
+        Fore.YELLOW + " [ DB_check ] => map_marker Table Created in mapper Database")
 
-""" make Directory For app Backup in user Direcory If Exist pass it"""
-app_backup_path = os.path.join(f"/home/{username}/KYGnus_Map/Files/Backup/App") 
-os.makedirs(app_backup_path,exist_ok=True) 
-logger.info(Fore.YELLOW + f"[ INFO ] Making Directory for doc Files in /home/{username}/KYGnus_Map/Files/Backup/app")
 
+# check number of Tables in mapper
+""" This Functions check Files and Database and return valid Data 
+for showing information in Index Page"""
+
+
+def check_tables():
+    db = pymysql.connect(host=config.DB_HOST,
+                         user=config.DB_USER,
+                         passwd=config.DB_PASSWORD,
+                         db=config.DB,
+                         port=config.DB_PORT,
+                         charset='utf8',
+                         use_unicode=True)
+    cur = db.cursor()
+    cur.execute("SHOW TABLES")
+    data = cur.fetchall()
+    db.close()
+    return len(data)
+
+
+# check Number of Files
+
+def number_of_files():
+    files = glob.glob(f"{Filespath}/**/*.*", recursive=True)
+    number_files = len(files)
+    return number_files
+
+
+# check Number of excel files
+
+def number_of_excel_files():
+    files = glob.glob(f"{excel_files_path}/**/*.*", recursive=True)
+    number_files = len(files)
+    return number_files
+
+
+# check Number of text files
+
+def number_of_txt_files():
+    files = glob.glob(f"{doc_files_path}/**/*.*", recursive=True)
+    number_files = len(files)
+    return number_files
+
+
+# check Number of map circular
+def number_of_circular_table():
+    roll = 5
+    con = pymysql.connect(host=config.DB_HOST,
+                          database=config.DB,
+                          user=config.DB_USER,
+                          port=config.DB_PORT,
+                          password=config.DB_PASSWORD)
+    cur = con.cursor()
+    cur.execute("SELECT * FROM map_circular")
+    cur.fetchall()
+    rc = cur.rowcount
+    cur.close()
+    return rc
+
+
+# check Number of map marker
+def number_of_marker_table():
+    roll = 5
+    con = pymysql.connect(host=config.DB_HOST,
+                          database=config.DB,
+                          user=config.DB_USER,
+                          port=config.DB_PORT,
+                          password=config.DB_PASSWORD)
+    cur = con.cursor()
+    cur.execute("SELECT * FROM map_marker")
+    cur.fetchall()
+    rc = cur.rowcount
+    cur.close()
+    return rc
 
 
 # Flask limiter
 """ Limit the number of requests to the server """
 limiter = Limiter(
-        app,
-        key_func=get_remote_address,
-        default_limits=["1000 per day", "500 per hour"]
+    app,
+    key_func=get_remote_address,
+    default_limits=["1000 per day", "500 per hour"]
 )
 
 app.config.update(
@@ -175,26 +294,29 @@ def loogin():
     return render_template("index.html")
 
 
-
 @app.route("/login")
 def login():
     return render_template("login.html")
 
 
 @app.route("/login", methods=["POST"])
-@limiter.limit("5 per minutes") # This Limits Requests to Prevent BruteForce Attack
+# This Limits Requests to Prevent BruteForce Attack
+@limiter.limit("5 per minutes")
 def loggin():
     username = request.form["username"]
     password = request.form["password"]
     if username == config.USERNAME and password == config.PASSWORD:
         logger.warning(Fore.RED + "user Try ro login")
         time.sleep(5)
-        number_of_files = len(glob.glob(f"/home/{username}/Documents/**/*.*" , recursive=True))
-        number_of_excel_files = len(glob.glob(f"/home/{username}/Documents/**/*.csv" , recursive=True))
-        number_of_documents = len(glob.glob(f"/home/{username}/Documents/**/*.txt" , recursive=True))
-        return render_template("index.html" , Number_of_Files=number_of_files , number_of_excel_file=number_of_excel_files , number_of_Documents=number_of_documents)
+        return render_template("index.html", Number_of_Files=number_of_files(),
+                               number_of_Documents=number_of_txt_files(),
+                               number_of_excel_file=number_of_excel_files(),
+                               number_of_tables=check_tables(),
+                               circular_table=number_of_circular_table(),
+                               marker_table=number_of_marker_table())
     else:
-        logger.warning(Fore.RED + "[ Warning ] Login Faild.system redirect User to /login")
+        logger.warning(
+            Fore.RED + "[ Warning ] Login Faild.system redirect User to /login")
         return redirect("/login")
 
 
@@ -202,7 +324,7 @@ def loggin():
 @login_required
 def logout():
     logout_user()
-    logger.info(Fore.YELLOW  +"[ INFO ] user logout")
+    logger.info(Fore.YELLOW + "[ INFO ] user logout")
     return Response('<p>Logged out</p>')
 
 
@@ -217,8 +339,7 @@ def load_user(userid):
     return User(userid)
 
 
-
-allowed_formats = {"csv"} # allowed file types
+allowed_formats = {"csv"}  # allowed file types
 
 
 # Secure File name
@@ -226,16 +347,15 @@ def check_files(filename):
     return "." in filename and filename.rsplit(".", 1)[1] in allowed_formats
 
 
-
-
-
 @app.route("/createmap")
 def createmap():
     logger.info(Fore.CYAN + "[ Info ] Loading Create Map Page")
     return render_template("createmap.html")
 
+
 """ This Route Create Route For main Map Without Any Marks
 This Will be Get Lat and Long and Create Map in That Locations"""
+
 
 @app.route("/createmap/createmainmap")
 def create_main_map():
@@ -243,18 +363,18 @@ def create_main_map():
     return render_template("main_map_creator.html")
 
 
-
-
-## TODO : create Template For main Map 
+# TODO : create Template For main Map
 """ This Route create main Map and save map in templates Directory
 This is Basic map with No Marker"""
-@app.route("/createmap/createmainmap" , methods=["POST"])
+
+
+@app.route("/createmap/createmainmap", methods=["POST"])
 def main_map():
     lat = request.form["lat"]
     lan = request.form["lan"]
     logger.info("lat: " + lat + " lan: " + lan)
     try:
-        map = folium.Map(location=[lat,lan], zoom_start = 14)
+        map = folium.Map(location=[lat, lan], zoom_start=14)
         logger.info(Fore.CYAN + "User Load Main map")
         map.save("./templates/maps/mainmap.html")
         logger.info(Fore.CYAN + "[ Info ] User Save Map")
@@ -263,79 +383,76 @@ def main_map():
         return Response("<html><body style='background-color:white;'><center ><h1 style='color:red;'> Can't Process Excel File !!!</h1><h2> Please Check File Type and Format Or Sure This File Design is True</center></html></body>")
 
 
-
-
 # marker
-
 """ This Route Create Map and insert Marker in File.
 This is Basic map with Marker and Save File in templates Directory in templates/maps"""
 
-@app.route("/createmap/map/marker" , methods=["POST"])
+
+@app.route("/createmap/map/marker", methods=["POST"])
 def marker():
     """ This route get excel File and insert marker on map"""
     csv_file = request.files["csv_file"]
     if check_files(csv_file.filename):
         print(check_files(csv_file.filename))
-        logger.info(Fore.YELLOW + "[ Info ] check File Format for Security Reasons")
+        logger.info(
+            Fore.YELLOW + "[ Info ] check File Format for Security Reasons")
         try:
             locations = pd.read_csv(csv_file)
             main_locations = locations[["Latitude", "Longitude", "Name"]]
-            map = folium.Map(location=[main_locations.Latitude.mean(), main_locations.Longitude.mean()], zoom_start=14, control_scale=True)
+            map = folium.Map(location=[main_locations.Latitude.mean(
+            ), main_locations.Longitude.mean()], zoom_start=14, control_scale=True)
             for index, location_info in main_locations.iterrows():
-                if folium.Marker([location_info["Latitude"], location_info["Longitude"]], popup=location_info["Name"]).add_to(map) :
+                if folium.Marker([location_info["Latitude"], location_info["Longitude"]], popup=location_info["Name"]).add_to(map):
                     map.save(f"./templates/maps/{csv_file.filename}.html")
                     print("map Saved succesfully")
-            goal_path = os.path.join(excel_marker_files_path, csv_file.filename)
-            csv_file.save(goal_path)  # the file save in Goal path
-            return redirect("/createmap")
-        except:
-             return Response("<html><body style='background-color:white;'><center ><h1 style='color:red;'> Can't Process Excel File !!!</h1><h2> Please Check File Type and Format Or Sure This File Design is True</center></html></body>")
-
-
-
-# circular marker
-
-""" This Route Make marker in Circular Mode and Save Map in template/maps Directory"""
-
-
-@app.route("/createmap/map/circular-maker" ,  methods=["POST"])
-def cmarker():
-    """ at this route and Function  make curcular maker to map.first Get excwl File and
-    make sure this File is Safe and after that save it in excelpath"""
-    csv_file = request.files["csv_file"]
-    if check_files(csv_file.filename):
-        print(check_files(csv_file.filename))
-        logger.info(Fore.YELLOW + "[ Info ] check File Format for Security Reasons")
-        try:
-            locations = pd.read_csv(csv_file)
-            main_locations = locations[["Latitude", "Longitude", "Name"]]
-            map = folium.Map(location=[main_locations.Latitude.mean(), main_locations.Longitude.mean()], zoom_start=14, control_scale=True)
-            for index, location_info in main_locations.iterrows():
-                if folium.CircleMarker([location_info["Latitude"], location_info["Longitude"]], popup=location_info["Name"]).add_to(map):
-                    map.save(f"./templates/maps/{csv_file.filename}_circular.html")
-                    print("map Saved succesfully")
-            goal_path = os.path.join(excel_marker_files_path, csv_file.filename)
+            goal_path = os.path.join(
+                excel_marker_files_path, csv_file.filename)
             csv_file.save(goal_path)  # the file save in Goal path
             return redirect("/createmap")
         except:
             return Response("<html><body style='background-color:white;'><center ><h1 style='color:red;'> Can't Process Excel File !!!</h1><h2> Please Check File Type and Format Or Sure This File Design is True</center></html></body>")
 
 
+# circular marker
+""" This Route Make marker in Circular Mode and Save Map in template/maps Directory"""
 
 
-
-
+@app.route("/createmap/map/circular-maker",  methods=["POST"])
+def cmarker():
+    """ at this route and Function  make curcular maker to map.first Get excwl File and
+    make sure this File is Safe and after that save it in excelpath"""
+    csv_file = request.files["csv_file"]
+    if check_files(csv_file.filename):
+        print(check_files(csv_file.filename))
+        logger.info(
+            Fore.YELLOW + "[ Info ] check File Format for Security Reasons")
+        try:
+            locations = pd.read_csv(csv_file)
+            main_locations = locations[["Latitude", "Longitude", "Name"]]
+            map = folium.Map(location=[main_locations.Latitude.mean(
+            ), main_locations.Longitude.mean()], zoom_start=14, control_scale=True)
+            for index, location_info in main_locations.iterrows():
+                if folium.CircleMarker([location_info["Latitude"], location_info["Longitude"]], popup=location_info["Name"]).add_to(map):
+                    map.save(
+                        f"./templates/maps/{csv_file.filename}_circular.html")
+                    print("map Saved succesfully")
+            goal_path = os.path.join(
+                excel_marker_files_path, csv_file.filename)
+            csv_file.save(goal_path)  # the file save in Goal path
+            return redirect("/createmap")
+        except:
+            return Response("<html><body style='background-color:white;'><center ><h1 style='color:red;'> Can't Process Excel File !!!</h1><h2> Please Check File Type and Format Or Sure This File Design is True</center></html></body>")
 
 
 # Related
-""" this Route Show Related Sites Like this Map , This is Have Sites 
+""" this Route Show Related Sites Like this Map , This is Have Sites
 and Their Link Can Download Data or Use Informations of This Sites"""
+
+
 @app.route("/related")
 def related():
     logger.info(Fore.YELLOW + "[ Info ] Get related template")
     return render_template("related.html")
-
-
 
 
 # Download Files
@@ -343,77 +460,73 @@ def related():
 # wget https://github.com/jadijadi/machine_learning_with_python_jadi/archive/refs/heads/main.zip
 
 
-
-
 # Extensions
 """ at This route You Can Download Extensions Like WordPress
 """
+
+
 @app.route("/extensions")
 def extensions_get():
     logger.info(Fore.YELLOW + "[ Info ] Get extensions template")
     return render_template("extensions.html")
 
-@app.route("/extensions/fs" , methods=["POST"])
+
+@app.route("/extensions/fs", methods=["POST"])
 def extensions_fs():
     opt = os.popen("cd /opt").read()
-    mainzip = os.popen("wget https://github.com/KooshaYeganeh/FS/archive/refs/heads/main.zip").read()
+    mainzip = os.popen(
+        "wget https://github.com/KooshaYeganeh/FS/archive/refs/heads/main.zip").read()
     unzip = os.popen("unzip main.zip").read()
     fs = os.popen("cd FS-main").read()
     usr_bin = os.popen("sudo cp sort /usr/bin").read()
     cd = os.popen("cd").read()
-    print(opt,mainzip,unzip,fs,usr_bin,cd)
+    print(opt, mainzip, unzip, fs, usr_bin, cd)
     logger.info(Fore.YELLOW + "[ Info ] FS App installed")
-    return render_template("success.html")  
+    return render_template("success.html")
 
 
-
-@app.route("/extensions/clamav" , methods=["POST"])
+@app.route("/extensions/clamav", methods=["POST"])
 def clamav_install():
     update = os.popen("sudo apt update -y").read()
     install = os.popen("sudo apt-get install clamav clamav-daemon -y").read()
     updatedb = os.popen("sudo freshclam").read()
-    print(update,install,updatedb)
+    print(update, install, updatedb)
     logger.info(Fore.YELLOW + "[ Info ] clamAV Installed")
     return render_template("success.html")
 
 
-
-
-@app.route("/extensions/maldet" , methods=["POST"])
+@app.route("/extensions/maldet", methods=["POST"])
 def maldet():
     update = os.popen("sudo apt update -y").read()
     chdir = os.popen("cd /tmp").read()
-    getfile = os.popen("wget http://www.rfxn.com/downloads/maldetect-current.tar.gz").read()
+    getfile = os.popen(
+        "wget http://www.rfxn.com/downloads/maldetect-current.tar.gz").read()
     unzip = os.popen("tar xfz maldetect-current.tar.gz").read()
     chmaldet = os.popen("cd maldetect-1.6.4").read()
     install = os.popen("./install").read()
-    print(update,chdir,getfile,unzip,chmaldet,install)
+    print(update, chdir, getfile, unzip, chmaldet, install)
     logger.info(Fore.YELLOW + "[ Info ] maldet Installed")
     return render_template("success.html")
 
 
-	
-@app.route("/extensions/rkhunter" , methods=["POST"])
+@app.route("/extensions/rkhunter", methods=["POST"])
 def rkhunter():
     update = os.popen("sudo apt update -y").read()
     install = os.popen("sudo apt install rkhunter -y").read()
-    print(update,install)
+    print(update, install)
     logger.info(Fore.YELLOW + "[ Info ] RootKit Hunter Installed")
     return render_template("success.html")
 
 
-
-
-@app.route("/extensions/lynis"  , methods=["POST"])
+@app.route("/extensions/lynis", methods=["POST"])
 def lynis():
     update = os.popen("sudo apt update -y").read()
     install = os.popen.read("sudo apt install lynis").read()
-    print(update,install)
+    print(update, install)
     logger.info(Fore.YELLOW + "[ Info ] Lynis Installed")
     return render_template("success.html")
 
 
-    
 # Admin
 
 @app.route("/user")
@@ -421,53 +534,63 @@ def admin():
     logger.info(Fore.YELLOW + "[ Info ] Admin Dashboard Loaded")
     return render_template("login_admin.html")
 
-## Login Admin
-@app.route("/user" , methods=["POST"])
+# Login Admin
+
+
+@app.route("/user", methods=["POST"])
 @limiter.limit("3 per minutes")
 def admin_login():
     admin_username = request.form["admin_username"]
     admin_password = request.form["admin_password"]
     if admin_username == config.ADMIN_USERNAME and admin_password == config.ADMIN_PASSWORD:
-        logger.info(Fore.YELLOW + "[ Info ] App sleep for Prevent Bruteforce Attack")
+        logger.info(
+            Fore.YELLOW + "[ Info ] App sleep for Prevent Bruteforce Attack")
         time.sleep(5)
-        csv_files = os.popen(f"find /home/{username}/KYGnus_Map/ -type f -iname '*.csv' | wc -l").read()
+        csv_files = os.popen(
+            f"find /home/{username}/KYGnus_Map/ -type f -iname '*.csv' | wc -l").read()
         map_files = os.popen("find ./templates/maps -type f | wc -l").read()
-        doc_file1 = os.popen(f"find /home/{username}/KYGnus_Map -type f -iname '*.docx' | wc -l").read()
-        doc_file2 = os.popen(f"find /home/{username}/KYGnus_Map -type f -iname '*.txt' | wc -l").read()
+        doc_file1 = os.popen(
+            f"find /home/{username}/KYGnus_Map -type f -iname '*.docx' | wc -l").read()
+        doc_file2 = os.popen(
+            f"find /home/{username}/KYGnus_Map -type f -iname '*.txt' | wc -l").read()
         alldoc = int(doc_file1) + int(doc_file2)
         roll = 5
         logger.info(Fore.YELLOW + "[ Info ] connecting To MariaDB")
         con = pymysql.connect(host=config.DB_HOST,
-                          database=config.DB,
-                          user=config.DB_USER,
-                          port=config.DB_PORT,
-                          password=config.DB_PASSWORD)
+                              database=config.DB,
+                              user=config.DB_USER,
+                              port=config.DB_PORT,
+                              password=config.DB_PASSWORD)
         logger.info(Fore.YELLOW + "[ Info ] connected To MariaDB")
         cur = con.cursor()
         cur.execute("SELECT * FROM map")
         cur.fetchall()
         rc = cur.rowcount
         cur.close()
-        return render_template("form_dash.html", database_record=rc , number_of_maps = map_files , number_of_excel_file = csv_files , number_of_documents = alldoc)
+        return render_template("form_dash.html", database_record=rc, number_of_maps=map_files, number_of_excel_file=csv_files, number_of_documents=alldoc)
     else:
-        logger.warning(Fore.RED + "[ Warning ] Username or Password is False,redirected to /admin")
+        logger.warning(
+            Fore.RED + "[ Warning ] Username or Password is False,redirected to /admin")
         return redirect("/user")
 
 
-## CSV to MYSQL
+# CSV to MYSQL
 """at This Route read csv File and try to save it in MYSQL"""
-@app.route("/user/csvtomtsql" , methods=["POST"])
+
+
+@app.route("/user/csvtomtsql", methods=["POST"])
 def csvtomtsql():
     # read csv file and save it in mysql
-    #csvfile = request.files["csv_file"]
-    logger.info(Fore.YELLOW + "[ Info ] connection to mariaDB to Insert csv File")
+    # csvfile = request.files["csv_file"]
+    logger.info(
+        Fore.YELLOW + "[ Info ] connection to mariaDB to Insert csv File")
     db = pymysql.connect(host=config.DB_HOST,
-						user=config.DB_USER,
-						passwd=config.DB_PASSWORD,
-						db=config.DB,
-						port=config.DB_PORT,
-						charset='utf8',
-						use_unicode=True)
+                         user=config.DB_USER,
+                         passwd=config.DB_PASSWORD,
+                         db=config.DB,
+                         port=config.DB_PORT,
+                         charset='utf8',
+                         use_unicode=True)
     try:
         cursor = db.cursor()
         csv_data = csv.reader(open("../dublin.csv"))
@@ -476,17 +599,16 @@ def csvtomtsql():
         for row in csv_data:
             # create table map (radif VARCHAR(100) , nam VARCHAR(1000) , tozih VARCHAR(1500) , tool varchar(1000) , arz varchar(1000));
             # cur.execute("INSERT INTO shohada (namekamel,tarikhetavallod,mahalletavllod,tarikheshahadat,mahalleshahadat,kholase,tozihat)" "VALUES('%s' , '%s' , '%s' , '%s' , '%s' ,'%s' ,'%s')" % (''.join(namekamel), ''.join(tarikhetavallod), ''.join(mahalletavllod), ''.join(tarikheshahadat), ''.join(mahalleshahadat), ''.join(kholase), ''.join(tozihat)))
-            cursor.execute("INSERT INTO map(radif,nam,tozih,tool,arz)" "VALUES(%s, %s,%s, %s , %s)",row)
+            cursor.execute(
+                "INSERT INTO map(radif,nam,tozih,tool,arz)" "VALUES(%s, %s,%s, %s , %s)", row)
             db.commit()
             cursor.close()
-            logger.info(Fore.YELLOW + "[ INFO ] File Read And Save in CSV File succuessfuly")
+            logger.info(
+                Fore.YELLOW + "[ INFO ] File Read And Save in CSV File succuessfuly")
             return render_template("success.html")
     except:
         logger.warning(Fore.RED + "[ Warning ] Can't Insert data to mariaDb")
-        return Response("<center><h2 > ERROR  </h2></br><p>Please Check File or MariaDB Columns ...</p></br><h1>Cant't Insert data to MariaDB !!!</h1></center>")  
-            
-
-
+        return Response("<center><h2 > ERROR  </h2></br><p>Please Check File or MariaDB Columns ...</p></br><h1>Cant't Insert data to MariaDB !!!</h1></center>")
 
 
 @app.route("/user/db/search", methods=["POST"])
@@ -497,7 +619,7 @@ def Search_db():
     cur.execute("SELECT * FROM map WHERE name = %s", jostoju)
     data1 = cur.fetchall()
     cur.close()
-	## TODO : Edit template to show data
+    # TODO : Edit template to show data
     return render_template("search_result_asnad.html", data=data1)
 
 
@@ -509,84 +631,55 @@ def remove_db():
         cur.execute("DELETE FROM map WHERE name = %s ", locname)
         data = db.commit()
         cur.close()
-        logger.warning(Fore.RED + "[ Warning ] Admin Delete one Row from map database")
+        logger.warning(
+            Fore.RED + "[ Warning ] Admin Delete one Row from map database")
         return render_template("success.html")
     except:
-        logger.warning(Fore.RED + "[ Warning ] Can't Delete one Row from map database")
+        logger.warning(
+            Fore.RED + "[ Warning ] Can't Delete one Row from map database")
         return render_template("404.html")
-
 
 
 @app.route("/user/db/backup", methods=["POST"])
 def db_backup():
-#     DB_HOST = config.DB_HOST
-#     DB_USER = config.DB_USER
-#     DB_USER_PASSWORD = config.DB_PASSWORD
-#     PORT = config.DB_PORT
-#     # DB_NAME = '/backup/dbnameslist.txt'
-#     DB_NAME = config.DB
-#     BACKUP_PATH = db_backup_path
-#     logger.warning(Fore.RED + "[ Warning ] Get backup of Database")
-#     # Getting current DateTime to create the separate backup folder like "20180817-123433".
-#     DATETIME = time.strftime('%Y%m%d-%H%M%S')
-#     TODAYBACKUPPATH = BACKUP_PATH + '/' + DATETIME
+    try:
+        logger.info(
+            Fore.YELLOW + " [ INFO ] => Connected To MariaDB to Get Backup")
+        db = pymysql.connect(host=config.DB_HOST,
+                             user=config.DB_USER,
+                             passwd=config.DB_PASSWORD,
+                             db=config.DB,
+                             port=config.DB_PORT,
+                             charset='utf8',
+                             use_unicode=True)
+        mydb = config.DB
+        cur = db.cursor()
+        cur.execute('SHOW TABLES;')
+        table_names = []
+        for record in cur.fetchall():
+            table_names.append(record[0])
+        backup_dbname = mydb + '_backup'
+        try:
+            cur.execute(f'CREATE DATABASE {backup_dbname}')
+        except:
+            pass
+        for table_name in table_names:
+            cur.execute(
+                f'CREATE TABLE {table_name} SELECT * FROM {mydb}.{table_name}')
+        return Response(f"""<html><body style='background-color:white;'>
+                        <center>
+                        <h3> Mariadb Backup</h3>
+                        <h2>Your backups have been created. </h2>
+                        </center>
+                        </body></html>""")
 
-#     # Checking if backup folder already exists or not. If not exists will create it.
-#     try:
-#         os.stat(TODAYBACKUPPATH)
-#     except:
-#         os.mkdir(TODAYBACKUPPATH)
-
-#     # Code for checking if you want to take single database backup or assinged multiple backups in DB_NAME.
-#     print("checking for databases names file.")
-#     if os.path.exists(DB_NAME):
-#         file1 = open(DB_NAME)
-#         multi = 1
-#         print("Databases file found...")
-#         logger.info(Fore.YELLOW + "[ Info ] Databases file found...")
-#         print("Starting backup of all dbs listed in file " + DB_NAME)
-#     else:
-#         print("Databases file not found...")
-#         print("Starting backup of database " + DB_NAME)
-#         multi = 0
-
-#     # Starting actual database backup process.
-#     if multi:
-#         in_file = open(DB_NAME, "r")
-#         flength = len(in_file.readlines())
-#         in_file.close()
-#         p = 1
-#         dbfile = open(DB_NAME, "r")
-
-#         while p <= flength:
-#             db = dbfile.readline()   # reading database name from file
-#             db = db[:-1]         # deletes extra line
-#             dumpcmd = "mysqldump -h " + DB_HOST + " -u " + DB_USER + " -p" + DB_USER_PASSWORD + \
-#                 " " + db + " > " + pipes.quote(TODAYBACKUPPATH) + "/" + db + ".sql"
-#             os.system(dumpcmd)
-#             gzipcmd = "gzip " + \
-#                 pipes.quote(TODAYBACKUPPATH) + "/" + db + ".sql"
-#             os.system(gzipcmd)
-#             p = p + 1
-#         dbfile.close()
-#     else:
-#         db = DB_NAME
-#         dumpcmd = "mysqldump -h " + DB_HOST + " -u " + DB_USER + " -p" + DB_USER_PASSWORD + \
-#             " " + db + " > " + pipes.quote(TODAYBACKUPPATH) + "/" + db + ".sql"
-#         os.system(dumpcmd)
-#         gzipcmd = "gzip " + pipes.quote(TODAYBACKUPPATH) + "/" + db + ".sql"
-#         os.system(gzipcmd)
-
-#     print("")
-    #print("Backup script completed")
-    backup = os.popen(f"mysqldump -u {config.DB_USER} -p {config.DB_PASSWORD} mapper > {db_backup_path}/mapper.sql").read()
-    return Response(f"<center><h1> Mariadb Backup</h1><h2>Your backups have been created. </h2><h1> File Saved in {db_backup_path}</h1></center>")
-
-
-
-
-
-
+    except:
+        return Response(f"""<html><body style='background-color:white;'>
+                        <center>
+                        <h3> Mariadb Backup</h3>
+                        <h2 style='color:red;'>ERROR on connectiong TO MariaDB </h2>
+                        </center>
+                        </body></html>""")
 
 
 @app.route("/user/db/export2excel", methods=["POST"])
@@ -598,9 +691,10 @@ def export_excel():
         port = config.DB_PORT  # mysql port
         db = config.DB  # database where your table is stored
         table = 'map'  # table you want to save
-        logger.critical( Fore.RED + "[ Warning ] admin Try to Dump Excel of Mapper Table in Excel")
+        logger.critical(
+            Fore.RED + "[ Warning ] admin Try to Dump Excel of Mapper Table in Excel")
         con = pymysql.connect(user=user, passwd=passwd,
-                          host=host, db=db, port=port)
+                              host=host, db=db, port=port)
         cursor = con.cursor()
         query = "SELECT * FROM %s;" % table
         cursor.execute(query)
@@ -613,73 +707,100 @@ def export_excel():
         return render_template("404.html")
 
 
-@app.route("/user/read_excel/circular" , methods=["POST"])
+@app.route("/user/read_excel/circular", methods=["POST"])
 def read_excel_cicular():
     excel_file = request.files["excel_file"]
-    if clear():
-        try:
-            df  = pd.read_csv(excel_file)
-            for index,(Number,Name,Address,Latitude,Longitude) in df.iterrows():
-                db = pymysql.connect(host=config.DB_HOST,
-                    user=config.DB_USER,
-					passwd=config.DB_PASSWORD,
-					db=config.DB,
-					port=config.DB_PORT,
-					charset='utf8',
-					use_unicode=True)
-                cur = db.cursor()
-                query = "INSERT INTO map VALUES( %s , %s , %s , %s , %s )"
-                cur.execute(query , 
-					(Number,Name,Address,Latitude,Longitude))
-                db.commit()
-                db.close()
-            return Response(f"""<body style='background-color:white;'>
-						<center>
-						<h2 style='color:red;'>Done</h2>
-						<h1>Excel File Saved Successfuly in Database</h1>
-						<a href='/'><button>Home</button></a>
-						</center>
-						</body>""")
+    try:
+        df = pd.read_csv(excel_file)
+        for index, (Number, Name, Address, Latitude, Longitude) in df.iterrows():
+            db = pymysql.connect(host=config.DB_HOST,
+                                 user=config.DB_USER,
+                                 passwd=config.DB_PASSWORD,
+                                 db=config.DB,
+                                 port=config.DB_PORT,
+                                 charset='utf8',
+                                 use_unicode=True)
+            cur = db.cursor()
+            query = "INSERT INTO map_circular VALUES( %s , %s , %s , %s , %s )"
+            cur.execute(query,
+                        (Number, Name, Address, Latitude, Longitude))
+            db.commit()
+            db.close()
+        return Response(f""" < body style='background-color:white;' >
+						< center >
+						< h2 style='color:red;' > Done < /h2 >
+						< h1 > Excel File Saved Successfuly in Database < /h1 >
+						< a href='/' > <button > Home < /button > </a >
+						< / center >
+						< / body > """)
 
-        except:
-            return Response(f"""<body style='background-color:white;'>
-						<center>
-						<h2 style='color:red;'>ERROR</h2>
-                            <h1 style='color:red;'>Error File Saving in Database</h1>
-						<a href='/'><button>Home</button></a>
-						</center>
-						</body>""")
+    except:
+        return Response(f""" < body style='background-color:white;' >
+						< center >
+						< h2 style='color:red;' > ERROR < /h2 >
+                            < h1 style='color:red;' > Error File Saving in Database < /h1 >
+						< a href='/' > <button > Home < /button > </a >
+						< / center >
+						< / body > """)
 
 
-    
-     
-#logs
+@app.route("/user/read_excel/marker", methods=["POST"])
+def read_excel_marker():
+    excel_file = request.files["excel_file"]
+    try:
+        df = pd.read_csv(excel_file)
+        for index, (Number, Name, Address, Latitude, Longitude) in df.iterrows():
+            db = pymysql.connect(host=config.DB_HOST,
+                                 user=config.DB_USER,
+                                 passwd=config.DB_PASSWORD,
+                                 db=config.DB,
+                                 port=config.DB_PORT,
+                                 charset='utf8',
+                                 use_unicode=True)
+            cur = db.cursor()
+            query = "INSERT INTO map_marker VALUES( %s , %s , %s , %s , %s )"
+            cur.execute(query,
+                        (Number, Name, Address, Latitude, Longitude))
+            db.commit()
+            db.close()
+        return Response(f""" < body style='background-color:white;' >
+						< center >
+						< h2 style='color:red;' > Done < /h2 >
+						< h1 > Excel File Saved Successfuly in Database < /h1 >
+						< a href='/' > <button > Home < /button > </a >
+						< / center >
+						< / body > """)
+
+    except:
+        return Response(f""" < body style='background-color:white;' >
+						< center >
+						< h2 style='color:red;' > ERROR < /h2 >
+                            < h1 style='color:red;' > Error File Saving in Database < /h1 >
+						< a href='/' > <button > Home < /button > </a >
+						< / center >
+						< / body > """)
+
+
+# logs
 @app.route("/user/logs")
 def logs():
-    with open("KYGnus_Map.log" , "r") as log_file:
+    with open("KYGnus_Map.log", "r") as log_file:
         log_read = log_file.readlines()
-        #logger.info(Fore.YELLOW + "[ Info ] Loading Log File")
-        return render_template("log.html" , log_line=log_read) 
-
-
-
+        # logger.info(Fore.YELLOW + "[ Info ] Loading Log File")
+        return render_template("log.html", log_line=log_read)
 
 
 # Document
-
 """ Create Minimal Documents For app in Html Style """
+
+
 @app.route("/documentation")
 def document():
     logger.info(Fore.YELLOW + "[ Info ] user Start to View Documentation")
     return render_template("Documentation.html")
 
 
-
-
-## TODO : create log template
-
-        
-
+# TODO : create log template
 
 
 @app.route("/analyzer")
@@ -689,44 +810,38 @@ def analyzer():
 
 # Document Analyzer
 
-## TODO : check Document File Type and Format and Extensions and Interior of File for Unwanted Data
+# TODO : check Document File Type and Format and Extensions and Interior of File for Unwanted Data
 
 
-@app.route("/analyzer/files" , methods=["POST"])
+@app.route("/analyzer/files", methods=["POST"])
 def post_document_analyzer():
    # logger.info(Fore.YELLOW + "[ Info ]  User start to Analyze Document")
     path = request.form["docfile"]
-    files = glob.glob(f"{path}/**/*.txt" , recursive=True)
+    files = glob.glob(f"{path}/**/*.txt", recursive=True)
     for file in files:
-        with open(file,"r") as readfile:
+        with open(file, "r") as readfile:
             result = readfile.read()
-            if re.search("encrypt",result) or re.search("decrypt",result) or re.search("crypt",result) or re.search("hacked" , result):
-                #logger.critical(Fore.RED + "Malicious File Detected [ERROR]")
-                with open(f"/home/{username}/KYGnus_Map/Analyze_results.txt" , "w") as af:
+            if re.search("encrypt", result) or re.search("decrypt", result) or re.search("crypt", result) or re.search("hacked", result):
+                # logger.critical(Fore.RED + "Malicious File Detected [ERROR]")
+                with open(f"/home/{username}/KYGnus_Map/Analyze_results.txt", "w") as af:
                     af.write("Malicious File Detected [ERROR]")
                     af.close()
             else:
-                with open(f"/home/{username}/KYGnus_Map/Analyze_results.txt" , "w") as af:
+                with open(f"/home/{username}/KYGnus_Map/Analyze_results.txt", "w") as af:
                     af.write("File check [ OK ]")
                     af.close()
-                #logger.info(Fore.CYAN + "File check [ OK ]")
+                # logger.info(Fore.CYAN + "File check [ OK ]")
     return Response(f"<body style='background-color:white;'><center><h2 style='color:red;''> File Checked </h2><h1> Results saved in app Directory </h1><h3> app Directory is {appdir}</h3></center></body>")
-
-        
 
 
 # maps
 @app.route("/maps")
 def maps():
     logger.info("system File Manager is Loaded in maps Directory")
-    maps = os.popen(f"xdg-open /home/{username}/work/Test/Mapper/mapper/templates/maps").read()
+    maps = os.popen(
+        f"xdg-open /home/{username}/work/Test/Mapper/mapper/templates/maps").read()
     return maps
 
 
-
-
-
-
-
-if __name__ == "__main__" :
-    app.run(port=8080 , debug=True)
+if __name__ == "__main__":
+    app.run(port=8080, debug=True)
