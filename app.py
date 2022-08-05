@@ -271,6 +271,19 @@ def number_of_marker_table():
     return rc
 
 
+def number_of_maps():
+    maps = glob.glob("./templates/maps/**/*.html", recursive=True)
+    num_maps = len(maps)
+    return num_maps
+
+
+def number_of_document_files():
+    docfiles = glob.glob(f"{doc_files_path}/**/*.docx")
+    txtfiles = glob.glob(f"{doc_files_path}/**/*.txt")
+    num_doc_files = len(docfiles) + len(txtfiles)
+    return num_doc_files
+
+
 # Flask limiter
 """ Limit the number of requests to the server """
 limiter = Limiter(
@@ -674,28 +687,11 @@ def admin_login():
         logger.info(
             Fore.YELLOW + "[ Info ] App sleep for Prevent Bruteforce Attack")
         time.sleep(5)
-        csv_files = os.popen(
-            f"find /home/{username}/KYGnus_Map/ -type f -iname '*.csv' | wc -l").read()
-        map_files = os.popen("find ./templates/maps -type f | wc -l").read()
-        doc_file1 = os.popen(
-            f"find /home/{username}/KYGnus_Map -type f -iname '*.docx' | wc -l").read()
-        doc_file2 = os.popen(
-            f"find /home/{username}/KYGnus_Map -type f -iname '*.txt' | wc -l").read()
-        alldoc = int(doc_file1) + int(doc_file2)
-        roll = 5
-        logger.info(Fore.YELLOW + "[ Info ] connecting To MariaDB")
-        con = pymysql.connect(host=config.DB_HOST,
-                              database=config.DB,
-                              user=config.DB_USER,
-                              port=config.DB_PORT,
-                              password=config.DB_PASSWORD)
-        logger.info(Fore.YELLOW + "[ Info ] connected To MariaDB")
-        cur = con.cursor()
-        cur.execute("SELECT * FROM map")
-        cur.fetchall()
-        rc = cur.rowcount
-        cur.close()
-        return render_template("form_dash.html", database_record=rc, number_of_maps=map_files, number_of_excel_file=csv_files, number_of_documents=alldoc)
+        csv_files = number_of_excel_files()
+        map_files = number_of_maps()
+        doc_file = number_of_document_files()
+        rc = number_of_marker_table() + number_of_circular_table()
+        return render_template("form_dash.html", database_record=rc, number_of_maps=map_files, number_of_excel_file=csv_files, number_of_documents=doc_file)
     else:
         logger.warning(
             Fore.RED + "[ Warning ] Username or Password is False,redirected to /admin")
@@ -706,37 +702,78 @@ def admin_login():
 """at This Route read csv File and try to save it in MYSQL"""
 
 
-@ app.route("/user/csvtomtsql", methods=["POST"])
-def csvtomtsql():
-    # read csv file and save it in mysql
-    # csvfile = request.files["csv_file"]
-    logger.info(
-        Fore.YELLOW + "[ Info ] connection to mariaDB to Insert csv File")
-    db = pymysql.connect(host=config.DB_HOST,
-                         user=config.DB_USER,
-                         passwd=config.DB_PASSWORD,
-                         db=config.DB,
-                         port=config.DB_PORT,
-                         charset='utf8',
-                         use_unicode=True)
+@app.route("/hamed-fd/read_excel/circular", methods=["POST"])
+def read_excel_cicular():
+    excel_file = request.files["excel_file"]
     try:
-        cursor = db.cursor()
-        csv_data = csv.reader(open("../dublin.csv"))
-        print(csv_data)
-        next(csv_data)
-        for row in csv_data:
-            # create table map (radif VARCHAR(100) , nam VARCHAR(1000) , tozih VARCHAR(1500) , tool varchar(1000) , arz varchar(1000));
-            # cur.execute("INSERT INTO shohada (namekamel,tarikhetavallod,mahalletavllod,tarikheshahadat,mahalleshahadat,kholase,tozihat)" "VALUES('%s' , '%s' , '%s' , '%s' , '%s' ,'%s' ,'%s')" % (''.join(namekamel), ''.join(tarikhetavallod), ''.join(mahalletavllod), ''.join(tarikheshahadat), ''.join(mahalleshahadat), ''.join(kholase), ''.join(tozihat)))
-            cursor.execute(
-                "INSERT INTO map(radif,nam,tozih,tool,arz)" "VALUES(%s, %s,%s, %s , %s)", row)
+        df = pd.read_csv(excel_file)
+        for index, (Number, Name, Address, Latitude, Longitude) in df.iterrows():
+            db = pymysql.connect(host=config.DB_HOST,
+                                 user=config.DB_USER,
+                                 passwd=config.DB_PASSWORD,
+                                 db=config.DB,
+                                 port=config.DB_PORT,
+                                 charset='utf8',
+                                 use_unicode=True)
+            cur = db.cursor()
+            query = "INSERT INTO map VALUES( %s , %s , %s , %s , %s )"
+            cur.execute(query,
+                        (Number, Name, Address, Latitude, Longitude))
             db.commit()
-            cursor.close()
-            logger.info(
-                Fore.YELLOW + "[ INFO ] File Read And Save in CSV File succuessfuly")
-            return render_template("success.html")
+            db.close()
+        return Response(f"""<body style='background-color:white;'>
+						<center>
+						<h2 style='color:red;'>Done</h2>
+						<h1>Excel File Saved Successfuly in Database</h1>
+						<a href='/'><button>Home</button></a>
+						</center>
+						</body>""")
+
     except:
-        logger.warning(Fore.RED + "[ Warning ] Can't Insert data to mariaDb")
-        return Response("<center><h2 > ERROR  </h2></br><p>Please Check File or MariaDB Columns ...</p></br><h1>Cant't Insert data to MariaDB !!!</h1></center>")
+        return Response(f"""<body style='background-color:white;'>
+						<center>
+						<h2 style='color:red;'>ERROR</h2>
+                            <h1 style='color:red;'>Error File Saving in Database</h1>
+						<a href='/'><button>Home</button></a>
+						</center>
+						</body>""")
+
+
+@app.route("/hamed-fd/read_excel/marker", methods=["POST"])
+def read_excel_cicular():
+    excel_file = request.files["excel_file"]
+    try:
+        df = pd.read_csv(excel_file)
+        for index, (Number, Name, Address, Latitude, Longitude) in df.iterrows():
+            db = pymysql.connect(host=config.DB_HOST,
+                                 user=config.DB_USER,
+                                 passwd=config.DB_PASSWORD,
+                                 db=config.DB,
+                                 port=config.DB_PORT,
+                                 charset='utf8',
+                                 use_unicode=True)
+            cur = db.cursor()
+            query = "INSERT INTO map VALUES( %s , %s , %s , %s , %s )"
+            cur.execute(query,
+                        (Number, Name, Address, Latitude, Longitude))
+            db.commit()
+            db.close()
+            return Response(f"""<body style='background-color:white;'>
+						<center>
+						<h2 style='color:red;'>Done</h2>
+						<h1>Excel File Saved Successfuly in Database</h1>
+						<a href='/'><button>Home</button></a>
+						</center>
+						</body>""")
+
+    except:
+        return Response(f"""<body style='background-color:white;'>
+						<center>
+						<h2 style='color:red;'>ERROR</h2>
+                            <h1 style='color:red;'>Error File Saving in Database</h1>
+						<a href='/'><button>Home</button></a>
+						</center>
+						</body>""")
 
 
 @ app.route("/user/db/search", methods=["POST"])
