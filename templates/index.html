@@ -168,7 +168,7 @@
 											<div class="card-body">
 												<div class="row">
 													<div class="col mt-0">
-														<h5 class="card-title">Inserted DataBase</h5>
+														<h5 class="card-title">Number of Tables</h5>
 													</div>
 
 													<div class="col-auto">
@@ -177,7 +177,7 @@
 														</div>
 													</div>
 												</div>
-												<h1 class="mt-1 mb-3">{{inserted_database}}</h1>
+												<h1 class="mt-1 mb-3">{{number_of_tables}}</h1>
 											</div>
 										</div>
 										<div class="card">
@@ -247,7 +247,8 @@
 								</div>
 								<div class="card-body py-3">
 									<div class="content">
-										2 Files imported and 5 File Analyzed in two days Ago
+										{{circular_table}} Record in circular Table and {{marker_table}} Record in
+										marker Table
 									</div>
 									<div class="chart chart-sm">
 										<canvas id="chartjs-dashboard-line"></canvas>
