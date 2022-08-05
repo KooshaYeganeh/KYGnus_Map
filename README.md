@@ -4,4 +4,9 @@ Easly Create Map and Some Other Features
 
 # Install
 
-> Create Directory with Name Apps in Home of user
+$ sudo ./KYGnus_Map_installer
+
+
+# Remove
+
+$ sudo ./KYGnus_Map_uninstaller
