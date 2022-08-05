@@ -702,7 +702,7 @@ def admin_login():
 """at This Route read csv File and try to save it in MYSQL"""
 
 
-@app.route("/hamed-fd/read_excel/circular", methods=["POST"])
+@app.route("/user/read_excel/circular", methods=["POST"])
 def read_excel_cicular():
     excel_file = request.files["excel_file"]
     try:
@@ -739,8 +739,8 @@ def read_excel_cicular():
 						</body>""")
 
 
-@app.route("/hamed-fd/read_excel/marker", methods=["POST"])
-def read_excel_cicular():
+@app.route("/user/read_excel/marker", methods=["POST"])
+def read_excel_marker():
     excel_file = request.files["excel_file"]
     try:
         df = pd.read_csv(excel_file)
@@ -878,7 +878,7 @@ def export_excel():
 
 
 @ app.route("/user/read_excel/circular", methods=["POST"])
-def read_excel_cicular():
+def read_excel_circular():
     excel_file = request.files["excel_file"]
     try:
         df = pd.read_csv(excel_file)
@@ -915,7 +915,7 @@ def read_excel_cicular():
 
 
 @ app.route("/user/read_excel/marker", methods=["POST"])
-def read_excel_marker():
+def read_excel_markerr():
     excel_file = request.files["excel_file"]
     try:
         df = pd.read_csv(excel_file)
