@@ -1,19 +1,46 @@
 #!/usr/bin/bash
 
 
+
+green=$(tput setaf 6)
+yellow=$(tput setaf 3)
+red=$(tput setaf 1)
+
+
+<<Get_users
+at This part Get users of system and choose first One
+Get_users
+
 user=`users | cut -d" " -f1`
+
+
+<<check_App_directory
+at This part od code check Apps directory in Home of User
+if Directory exists pass else try to create it
+check_App_directory
 
 APP_DIR=/home/$user/Apps
 if [ -d "$APP_DIR" ]; then
     true
+    echo "$yellow $APP_DIR exists"
 else
     mkdir /home/$user/Apps
+    echo "$green Apps Directory cretaed [ OK ]"
 fi
+
 
 cd /home/$user/Apps
 
 mkdir KYGnus_Map
+echo "$green KYGnus_Map Directory cretaed [ OK ]"
 cd KYGnus_Map
+
+<<python_install
+at this part installer try to install python tools
+like virtualenv and Other Requirement to run app
+python_install
+
+echo "$yellow Installer File try to install python tools"
 
 sudo pip install virtualenv
 
@@ -21,8 +48,16 @@ source venv/bin/activate
 
 sudo pip install -r requirements.txt
 
+echo "$green Python Tools and packages Installed [ OK ]"
 
 
+
+
+
+<<systemd
+at This part installer try to create .service File
+and move File to /etc/systemd/system to create service of APP
+systemd
 
 this_dir=`pwd`
 
@@ -35,7 +70,18 @@ sudo systemctl enable --now KYGnus_Map.service
 
 sudo systemctl start KYGnus_Map.service
 
+echo "$green .service File created and service of app added to /etc/systemd/system [ OK ]"
 
+# Make config Dir and File
+
+
+<<config_file
+at this part installer File try to create config directory
+in /etc and create config file and make softlink of config.py
+in /etc/KYGnus_Map to build starndard config filepath
+config_file
+
+echo "$yellow installer try to create config File and config dir"
 
 cd /etc
 
@@ -47,7 +93,19 @@ ln -s /home/$user/Apps/KYGnus_Map/config.py KYGnus_Map.conf
 
 cd
 
+echo "$green config file and config dir created [ OK ]"
 
+
+<<log_file
+at this part installer File try to create log directory
+in /var/log and create log file and make softlink of KYGnus_Map.log
+in /etc/KYGnus_Map to build starndard log filepath of main log file
+log_file
+
+
+# Make log Dir
+
+echo "$yellow installer try to Link log File and create log dir"
 
 cd /var/log
 
@@ -59,9 +117,12 @@ ln -s /home/$user/Apps/KYGnus_Map/KYGnus_Map.log KYGnus_Map.log
 
 cd
 
+echo "$green log file and log dir created [ OK ]"
 
 
 
+echo "$red installer Try to config firewall"
+# Firewall Rules
 sudo iptables -A INPUT -i enp0s1 -p tcp -m multiport ! --dport 22,80,443,8080 -j REJECT
 sudo iptables -A INPUT -i enp1s0 -p tcp ! --syn -m state --state NEW -j DROP
 sudo iptables -A INPUT -i enp1s0 -p tcp -m state --state ESTABLISHED,RELATED -j ACCEPT
@@ -91,7 +152,7 @@ sudo iptables -P INPUT DROP
 sudo iptables -P OUTPUT DROP
 
 
-
+echo "$green Frewall config is [ OK ]"
 
 
 
