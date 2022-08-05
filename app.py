@@ -781,7 +781,7 @@ def Search_db():
     jostoju = request.form["search"]
     logger.info(Fore.YELLOW + "[ Info ] user Start to Search ans asnad")
     cur = db.cursor()
-    cur.execute("SELECT * FROM map WHERE name = %s", jostoju)
+    cur.execute(f"SELECT * FROM map WHERE Name LIKE '%{jostoju}%'")
     data1 = cur.fetchall()
     cur.close()
     # TODO : Edit template to show data
@@ -831,10 +831,10 @@ def db_backup():
         for table_name in table_names:
             cur.execute(
                 f'CREATE TABLE {table_name} SELECT * FROM {mydb}.{table_name}')
-        return Response(f"""<html><body style='background-color:white;'>
+        return Response(f"""<html><body style='background-color:#A9A9A9;'>
                         <center>
-                        <h3> Mariadb Backup</h3>
-                        <h2>Your backups have been created. </h2>
+                        <h3>Your backups have been created.</h3>
+                       <img src='./static/Mariadb.png' alt='Github' width="900" height="300">
                         </center>
                         </body></html>""")
 
@@ -867,7 +867,12 @@ def export_excel():
             writer = csv.writer(f)
             for row in cursor.fetchall():
                 writer.writerow(row)
-                return render_template("success.html")
+            return Response(f"""<html><body style='background-color:#8FBC8F;'>
+                        <center>
+                        <h2 style='color:#2F4F4F;'>Successfully Export</h2>
+                       <img src='./static/excel.jpg' alt='Github' width="1000" height="500">
+                        </center>
+                        </body></html>""")
     except:
         return render_template("404.html")
 
@@ -891,22 +896,22 @@ def read_excel_cicular():
                         (Number, Name, Address, Latitude, Longitude))
             db.commit()
             db.close()
-        return Response(f""" < body style='background-color:white;' >
-						< center >
-						< h2 style='color:red;' > Done < /h2 >
-						< h1 > Excel File Saved Successfuly in Database < /h1 >
-						< a href='/' > <button > Home < /button > </a >
-						< / center >
-						< / body > """)
+        return Response(f"""<html><body style='background-color:#8FBC8F;'>
+                        <center>
+                        <h2 style='color:#2F4F4F;'>Successfully Export</h2>
+                       <img src='./static/excel.jpg' alt='excel' width="600" height="400">
+                       <img src='./static/Mariadb.png' alt='mariadb' width="600" height="400">
+                        </center>
+                        </body></html>""")
 
     except:
-        return Response(f""" < body style='background-color:white;' >
-						< center >
-						< h2 style='color:red;' > ERROR < /h2 >
-                            < h1 style='color:red;' > Error File Saving in Database < /h1 >
-						< a href='/' > <button > Home < /button > </a >
-						< / center >
-						< / body > """)
+        return Response(f"""<html><body style='background-color:#FFF0F5;'>
+                        <center>
+                        <h1 style='color:red;'> Export ERROR !!! </h1>
+                       <img src='./static/excel.jpg' alt='excel' width="600" height="400">
+                       <img src='./static/Mariadb.png' alt='mariadb' width="600" height="400">
+                        </center>
+                        </body></html>""")
 
 
 @ app.route("/user/read_excel/marker", methods=["POST"])
@@ -928,22 +933,22 @@ def read_excel_marker():
                         (Number, Name, Address, Latitude, Longitude))
             db.commit()
             db.close()
-        return Response(f""" < body style='background-color:white;' >
-						< center >
-						< h2 style='color:red;' > Done < /h2 >
-						< h1 > Excel File Saved Successfuly in Database < /h1 >
-						< a href='/' > <button > Home < /button > </a >
-						< / center >
-						< / body > """)
+        return Response(f"""<html><body style='background-color:#8FBC8F;'>
+                        <center>
+                        <h2 style='color:#2F4F4F;'>Successfully Export</h2>
+                       <img src='./static/excel.jpg' alt='excel' width="600" height="400">
+                       <img src='./static/Mariadb.png' alt='mariadb' width="600" height="400">
+                        </center>
+                        </body></html>""")
 
     except:
-        return Response(f""" < body style='background-color:white;' >
-						< center >
-						< h2 style='color:red;' > ERROR < /h2 >
-                            < h1 style='color:red;' > Error File Saving in Database < /h1 >
-						< a href='/' > <button > Home < /button > </a >
-						< / center >
-						< / body > """)
+        return Response(f"""<html><body style='background-color:#FFF0F5;'>
+                        <center>
+                        <h1 style='color:red;'> Export ERROR !!! </h1>
+                       <img src='./static/excel.jpg' alt='excel' width="600" height="400">
+                       <img src='./static/Mariadb.png' alt='mariadb' width="600" height="400">
+                        </center>
+                        </body></html>""")
 
 
 # logs
