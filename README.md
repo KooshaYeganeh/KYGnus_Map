@@ -22,6 +22,7 @@ Then Just Run KYGnus_Map_installer with sudo
 
 $ sudo **./KYGnus_Map_installer**
 
+Note : change config File in **/etc/KYGnus_Map/KYGnus_Map.conf** with Your configurations
 
 # Uninstall
 
