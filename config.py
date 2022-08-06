@@ -6,11 +6,11 @@ ADMIN_PASSWORD = "admin"
 DB_HOST = "127.0.0.1"
 DB_REMOTE_HOST = "127.0.0.1"
 
-DB_USER = "root"
-DB_REMOTE_USER = "root"
+DB_USER = "user of Database"
+DB_REMOTE_USER = "User of remote system"
 
-DB_PASSWORD = "Koosha_102030"
-DB_REMOTE_PASSWORD = "Koosha_102030"
+DB_PASSWORD = "Password of Database"
+DB_REMOTE_PASSWORD = "Password of Remote Server Database"
 
 DB = "mapper"
-DB_PORT = 3360
+DB_PORT = Port of mariaDB
