@@ -418,6 +418,7 @@ This is Basic map with Marker and Save File in templates Directory in templates/
 def marker():
     """ This route get excel File and insert marker on map"""
     csv_file = request.files["csv_file"]
+    zoom = request.form["zoom_start"]
     if check_files(csv_file.filename):
         print(check_files(csv_file.filename))
         logger.info(
@@ -426,7 +427,7 @@ def marker():
             locations = pd.read_csv(csv_file)
             main_locations = locations[["Latitude", "Longitude", "Name"]]
             map = folium.Map(location=[main_locations.Latitude.mean(
-            ), main_locations.Longitude.mean()], zoom_start=14, control_scale=True)
+            ), main_locations.Longitude.mean()], zoom_start=zoom, control_scale=True)
             for index, location_info in main_locations.iterrows():
                 if folium.Marker([location_info["Latitude"], location_info["Longitude"]], popup=location_info["Name"]).add_to(map):
                     map.save(f"./templates/maps/{csv_file.filename}.html")
@@ -448,6 +449,7 @@ def cmarker():
     """ at this route and Function  make curcular maker to map.first Get excwl File and
     make sure this File is Safe and after that save it in excelpath"""
     csv_file = request.files["csv_file"]
+    zoom = request.form["zoom_start"]
     if check_files(csv_file.filename):
         print(check_files(csv_file.filename))
         logger.info(
@@ -456,7 +458,7 @@ def cmarker():
             locations = pd.read_csv(csv_file)
             main_locations = locations[["Latitude", "Longitude", "Name"]]
             map = folium.Map(location=[main_locations.Latitude.mean(
-            ), main_locations.Longitude.mean()], zoom_start=14, control_scale=True)
+            ), main_locations.Longitude.mean()], zoom_start=zoom, control_scale=True)
             for index, location_info in main_locations.iterrows():
                 if folium.CircleMarker([location_info["Latitude"], location_info["Longitude"]], popup=location_info["Name"]).add_to(map):
                     map.save(
