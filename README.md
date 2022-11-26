@@ -8,7 +8,19 @@ Easly Create Map and Some Other Features
 
 1- Linux : I Test App in **Fedora35** and **Ubuntu22.04** <br />
 2- MariaDB <br />
+**Fedora:**
+`sudo dnf install mariadb-server`
+**Ubuntu:**
+`sudo apt install mariadb-server`
+**OpenSuse:**
+`sudo zypper install mariadb-server`
 3- Python & pip <br />
+**Fedora:**
+`sudo dnf install python-pip`
+**Ubuntu:**
+`sudo apt install python3-pip`
+**OpenSuse:**
+`sudo zypper install python3-pip`
 
 
 
