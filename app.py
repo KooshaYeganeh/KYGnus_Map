@@ -35,15 +35,20 @@ from pathlib import Path
 app = Flask(__name__)
 
 
+logdir = os.path.join(f"/opt/KYGnus_Map/LOG")
+os.makedirs(logdir, exist_ok=True)
+
+
 """ Define Basic Configs of Logging.This Bsic Configs have Time and
 Message and FileMode"""
-logging.basicConfig(filename="KYGnus_Map.log",
+logging.basicConfig(filename=f"{logdir}/KYGnus_Map.log",
                     format='%(asctime)s %(message)s',
                     filemode='w')
 
 logger = logging.getLogger()  # Create Logger of Logging System
 
 logger.setLevel(logging.DEBUG)  # Set Level For Logger
+
 
 logger.info(Fore.GREEN + """
 
@@ -81,60 +86,62 @@ logger.info(
 
 
 # Create Directory For App
-appdir = os.path.join(f"/home/{username}/KYGnus_Map")
+appdir = os.path.join(f"/opt/KYGnus_Map")
 os.makedirs(appdir, exist_ok=True)
 logger.info(Fore.YELLOW + "[ INFO ] App Create Directory in Home of username")
 
 
 # Create Directory For Filed in App Directory
 """ make Directory For Files in user Direcory If Exist pass it"""
-Filespath = os.path.join(f"/home/{username}/KYGnus_Map/Files")
+Filespath = os.path.join("/opt/KYGnus_Map/Files")
 os.makedirs(Filespath, exist_ok=True)
 logger.info(Fore.YELLOW +
-            f"[ INFO ] Making Directory for Files in /home/{username}/KYGnus_Map")
+            f"[ INFO ] Making Directory for Files in /opt/KYGnus_Map")
 
 
 """ make Directory For  Excel Files in user Direcory If Exist pass it"""
-excel_files_path = os.path.join(f"/home/{username}/KYGnus_Map/Files/Excel")
+excel_files_path = os.path.join("/opt/KYGnus_Map/Files/Excel")
 os.makedirs(excel_files_path, exist_ok=True)
 logger.info(Fore.YELLOW +
-            f"[ INFO ] Making Directory for Excel Files in /home/{username}/KYGnus_Map/Files")
+            f"[ INFO ] Making Directory for Excel Files in /opt/KYGnus_Map/Files")
 
 
 """ make Directory For CIrcular Markger Excel Files in user Direcory If Exist pass it"""
 excel_marker_files_path = os.path.join(
-    f"/home/{username}/KYGnus_Map/Files/Excel/marker")
+    "/opt/KYGnus_Map/Files/Excel/marker")
 os.makedirs(excel_marker_files_path, exist_ok=True)
 logger.info(Fore.YELLOW +
-            f"[ INFO ] Making Directory for Excel Files in /home/{username}/KYGnus_Map/Files")
+            f"[ INFO ] Making xDirectory for Excel Files in /opt/KYGnus_Map/Files")
 
 """ make Directory For circular marker Excel Files in user Direcory If Exist pass it"""
 excel_cmarker_files_path = os.path.join(
-    f"/home/{username}/KYGnus_Map/Files/Excel/circular")
+    "/opt/KYGnus_Map/Files/Excel/circular")
 os.makedirs(excel_cmarker_files_path, exist_ok=True)
 logger.info(Fore.YELLOW +
-            f"[ INFO ] Making Directory for Excel Files in /home/{username}/KYGnus_Map/Files")
+            f"[ INFO ] Making Directory for Excel Files in /opt/KYGnus_Map/Files")
 
 
 """ make Directory For doc Files in user Direcory If Exist pass it"""
-doc_files_path = os.path.join(f"/home/{username}/KYGnus_Map/Files/Documents")
+doc_files_path = os.path.join("/opt/KYGnus_Map/Files/Documents")
 os.makedirs(doc_files_path, exist_ok=True)
 logger.info(Fore.YELLOW +
-            f"[ INFO ] Making Directory for doc Files in /home/{username}/KYGnus_Map/Files")
+            f"[ INFO ] Making Directory for doc Files in /opt/KYGnus_Map/Files")
 
 
 """ make Directory For Files in user Direcory If Exist pass it"""
-backup_path = os.path.join(f"/home/{username}/KYGnus_Map/Files/Backup")
+backup_path = os.path.join("/opt/KYGnus_Map/Files/Backup")
 os.makedirs(backup_path, exist_ok=True)
 logger.info(Fore.YELLOW +
-            f"[ INFO ] Making Directory for doc Files in /home/{username}/KYGnus_Map/Files/Backup")
+            f"[ INFO ] Making Directory for doc Files in /opt/KYGnus_Map/Files/Backup")
 
 
 """ make Directory For DB Backup Files in user Direcory If Exist pass it"""
-db_backup_path = os.path.join(f"/home/{username}/KYGnus_Map/Files/Backup/DB")
+db_backup_path = os.path.join("/opt/KYGnus_Map/Files/Backup/DB")
 os.makedirs(db_backup_path, exist_ok=True)
 logger.info(Fore.YELLOW +
-            f"[ INFO ] Making Directory for doc Files in /home/{username}/KYGnus_Map/Files/Backup/DB")
+            f"[ INFO ] Making Directory for doc Files in /opt/KYGnus_Map/Files/Backup/DB")
+
+
 
 
 def check_db():
@@ -995,11 +1002,11 @@ def post_document_analyzer():
             result = readfile.read()
             if re.search("encrypt", result) or re.search("decrypt", result) or re.search("crypt", result) or re.search("hacked", result):
                 # logger.critical(Fore.RED + "Malicious File Detected [ERROR]")
-                with open(f"/home/{username}/KYGnus_Map/Analyze_results.txt", "w") as af:
+                with open(f"/opt/KYGnus_Map/Analyze_results.txt", "w") as af:
                     af.write("Malicious File Detected [ERROR]")
                     af.close()
             else:
-                with open(f"/home/{username}/KYGnus_Map/Analyze_results.txt", "w") as af:
+                with open(f"/opt/KYGnus_Map/Analyze_results.txt", "w") as af:
                     af.write("File check [ OK ]")
                     af.close()
                 # logger.info(Fore.CYAN + "File check [ OK ]")
@@ -1011,7 +1018,7 @@ def post_document_analyzer():
 def maps():
     logger.info("system File Manager is Loaded in maps Directory")
     maps = os.popen(
-        f"xdg-open /home/{username}/work/Test/Mapper/mapper/templates/maps").read()
+        f"xdg-open /opt/KYgnus_Map/templates/maps").read()
     return maps
 
 
