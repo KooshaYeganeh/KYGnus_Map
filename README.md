@@ -14,16 +14,12 @@ Easly Create Map and Some Other Features
 
 # Install
 
-> First Install mariadb and Create Database mapper 
+Run KYGnus_Map_installer with sudo
 
-MariaDB [(none)]> CREATE DATABASE mapper;
-
-Then Just Run KYGnus_Map_installer with sudo
-
-$ sudo **./KYGnus_Map_installer**
+`sudo ./install`
 
 Note : change config File in **/etc/KYGnus_Map/KYGnus_Map.conf** with Your configurations
 
 # Uninstall
 
-$ sudo **./KYGnus_Map_uninstaller**
+`sudo ./remove`
