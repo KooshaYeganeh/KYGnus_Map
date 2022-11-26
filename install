@@ -1,0 +1,299 @@
+#!/usr/bin/bash
+
+
+
+green=$(tput setaf 6)
+yellow=$(tput setaf 3)
+red=$(tput setaf 1)
+
+
+<<Get_users
+at This part Get users of system and choose first One
+Get_users
+
+user=`users | cut -d" " -f1`
+
+mariadb_status=`sudo systemctl status mariadb | grep -o "Active: active"`
+if [ "$mariadb_status" == "Active: active" ];then
+	echo "MariaDB Active and Running"
+else
+	echo "MariaDB is Not Running [ WARNING ]"
+	sudo systemctl start mariadb
+	printf "Enter MariaDB user: "
+	read Muser
+	echo "You Will be Enter MaraiDB password"
+	mysql -u $Muser -p --execute="CREATE DATABASE mapper"
+	echo "Database Created Successfully [ OK ]"
+fi
+
+
+<<check_App_directory
+at This part od code check Apps directory in Home of User
+if Directory exists pass else try to create it
+check_App_directory
+
+APP_DIR=/opt/KYGnus_Map
+if [ -d "$APP_DIR" ]; then
+    true
+    echo "$yellow $APP_DIR exists"
+else
+    mkdir /opt/KYGnus_Map
+    echo "$green Apps Directory cretaed [ OK ]"
+fi
+
+
+cd /opt/KYGnus_Map
+
+<<python_install
+at this part installer try to install python tools
+like virtualenv and Other Requirement to run app
+python_install
+
+echo "$yellow Installer File try to install python tools"
+
+# For Ubuntu or OpenSuse :
+# Note: if Get Error When Install requirements File remove versions of Packages and Try Again
+
+sudo pip install -r requirements.txt
+
+
+echo "$green Python Tools and packages Installed [ OK ]"
+
+
+
+
+
+<<systemd
+at This part installer try to create .service File
+and move File to /etc/systemd/system to create service of APP
+systemd
+
+this_dir=`pwd`
+
+
+echo -e "[Unit]\nDescription=App with Web UI to working Maps and Data\n\n[Service]\nType=simple\nExecStart=/bin/bash\s$this_dir/KYGnus_Map.sh\n\n[Install]\nWantedBy=multi-user.target" > KYGnus_Map.service
+
+sudo cp KYGnus_Map.service /etc/systemd/system
+
+sudo systemctl enable --now KYGnus_Map.service
+
+sudo systemctl start KYGnus_Map.service
+
+echo "$green .service File created and service of app added to /etc/systemd/system [ OK ]"
+
+# Make config Dir and File
+
+
+<<config_file
+at this part installer File try to create config directory
+in /etc and create config file and make softlink of config.py
+in /etc/KYGnus_Map to build starndard config filepath
+config_file
+
+echo "$yellow installer try to create config File and config dir"
+
+cd /etc
+
+sudo mkdir KYGnus_Map
+
+cd KYGnus_Map
+
+ln -s /home/$user/Apps/KYGnus_Map/config.py KYGnus_Map.conf
+
+cd
+
+echo "$green config file and config dir created [ OK ]"
+
+
+<<log_file
+at this part installer File try to create log directory
+in /var/log and create log file and make softlink of KYGnus_Map.log
+in /etc/KYGnus_Map to build starndard log filepath of main log file
+log_file
+
+
+# Make log Dir
+
+echo "$yellow installer try to Link log Dir and create log dir in /var/log"
+
+cd /var/log
+
+sudo mkdir KYGnus_Map
+
+ln -s /opt/KYGnus_Map/LOG/ KYGnus_Map
+
+cd
+
+echo "$green log file and log dir created [ OK ]"
+
+RedHat=`cat /proc/version | grep -o 'Red Hat'`
+ubuntu=`cat /proc/version | grep -o 'ubuntu'`
+
+iptables=`iptables -V | cut -d" " -f2 | grep -o 'v*'`
+
+if [ "$iptables" == "v" ];then
+	if [ "$RedHat" == "Red Hat" ];then
+		echo "$red installer Try to config firewall"
+		# Firewall Rules
+		sudo iptables -A INPUT -i enp0s1 -p tcp -m multiport ! --dport 22,80,443,8080 -j REJECT
+		sudo iptables -A INPUT -i enp1s0 -p tcp ! --syn -m state --state NEW -j DROP
+		sudo iptables -A INPUT -i enp1s0 -p tcp -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+		sudo iptables -A OUTPUT -o enp1s0 -p tcp -m multiport --sport 22,80,443 -j ACCEPT
+
+		sudo iptables -A INPUT -i enp1s0 -p tcp --tcp-flags ALL NONE -j DROP
+
+		sudo iptables -A INPUT -i enp1s0 -p tcp --tcp-flags PSH,URG,FIN PSH,URG,FIN -j REJECT
+
+		sudo iptables -A INPUT -p tcp -m state --state INVALID -j DROP
+
+		sudo iptables -A INPUT -p tcp -m connlimit --connlimit-above 100 -j DROP
+
+		sudo iptables -A INPUT -f -j DROP
+
+		sudo iptables -A INPUT -p icmp --icmp-type 8 -j DROP
+
+		sudo iptables -A INPUT -p icmp --icmp-type 13 -j DROP
+
+		sudo iptables -A INPUT -p icmp --icmp-type 14 -j DROP
+
+		sudo iptables -A INPUT -i enp1s0 -p tcp --syn -m limit --limit 100/minute --limit-burst 80 -j DROP
+
+		sudo iptables -P INPUT DROP
+
+		sudo iptables -P OUTPUT DROP
+		
+		sudo iptables-save > etc/sysconfig/iptables
+
+		echo "$green Frewall config is [ OK ]"
+	
+	elif [ "$ubuntu" == "ubuntu" ];then
+		echo "$red installer Try to config firewall"
+		# Firewall Rules
+		sudo iptables -A INPUT -i enp0s1 -p tcp -m multiport ! --dport 22,80,443,8080 -j REJECT
+		sudo iptables -A INPUT -i enp1s0 -p tcp ! --syn -m state --state NEW -j DROP
+		sudo iptables -A INPUT -i enp1s0 -p tcp -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+		sudo iptables -A OUTPUT -o enp1s0 -p tcp -m multiport --sport 22,80,443 -j ACCEPT
+
+		sudo iptables -A INPUT -i enp1s0 -p tcp --tcp-flags ALL NONE -j DROP
+
+		sudo iptables -A INPUT -i enp1s0 -p tcp --tcp-flags PSH,URG,FIN PSH,URG,FIN -j REJECT
+
+		sudo iptables -A INPUT -p tcp -m state --state INVALID -j DROP
+
+		sudo iptables -A INPUT -p tcp -m connlimit --connlimit-above 100 -j DROP
+
+		sudo iptables -A INPUT -f -j DROP
+
+		sudo iptables -A INPUT -p icmp --icmp-type 8 -j DROP
+
+		sudo iptables -A INPUT -p icmp --icmp-type 13 -j DROP
+
+		sudo iptables -A INPUT -p icmp --icmp-type 14 -j DROP
+
+		sudo iptables -A INPUT -i enp1s0 -p tcp --syn -m limit --limit 100/minute --limit-burst 80 -j DROP
+
+		sudo iptables -P INPUT DROP
+
+		sudo iptables -P OUTPUT DROP
+
+		sudo iptables-save > /etc/iptables/rules.v4
+
+		echo "$green Frewall config is [ OK ]"
+	else
+		echo "Cat Not Detect OS [ ERROR ]"
+	fi
+
+
+
+else
+	if [ "$RedHat" == "Red Hat" ];then
+		sudo dnf install iptables -y
+		sudo dnf install iptables-services -y
+		
+		echo "$red installer Try to config firewall"
+		
+
+		# Firewall Rules
+		sudo iptables -A INPUT -i enp0s1 -p tcp -m multiport ! --dport 22,80,443,8080 -j REJECT
+		sudo iptables -A INPUT -i enp1s0 -p tcp ! --syn -m state --state NEW -j DROP
+		sudo iptables -A INPUT -i enp1s0 -p tcp -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+		sudo iptables -A OUTPUT -o enp1s0 -p tcp -m multiport --sport 22,80,443 -j ACCEPT
+
+		sudo iptables -A INPUT -i enp1s0 -p tcp --tcp-flags ALL NONE -j DROP
+
+		sudo iptables -A INPUT -i enp1s0 -p tcp --tcp-flags PSH,URG,FIN PSH,URG,FIN -j REJECT
+
+		sudo iptables -A INPUT -p tcp -m state --state INVALID -j DROP
+
+		sudo iptables -A INPUT -p tcp -m connlimit --connlimit-above 100 -j DROP
+
+		sudo iptables -A INPUT -f -j DROP
+
+		sudo iptables -A INPUT -p icmp --icmp-type 8 -j DROP
+
+		sudo iptables -A INPUT -p icmp --icmp-type 13 -j DROP
+
+		sudo iptables -A INPUT -p icmp --icmp-type 14 -j DROP
+
+		sudo iptables -A INPUT -i enp1s0 -p tcp --syn -m limit --limit 100/minute --limit-burst 80 -j DROP
+
+		sudo iptables -P INPUT DROP
+
+		sudo iptables -P OUTPUT DROP
+		
+		sudo iptables-save > /etc/sysconfig/iptables
+
+		echo "$green Frewall config is [ OK ]"
+
+
+	elif [ "$ubuntu" == "ubuntu" ];then
+		sudo apt install iptables -y
+		sudo mkdir /etc/iptables
+		sudo touch /etc/iptables/rules.v4
+
+		echo "$red installer Try to config firewall"
+		# Firewall Rules
+		sudo iptables -A INPUT -i enp0s1 -p tcp -m multiport ! --dport 22,80,443,8080 -j REJECT
+		sudo iptables -A INPUT -i enp1s0 -p tcp ! --syn -m state --state NEW -j DROP
+		sudo iptables -A INPUT -i enp1s0 -p tcp -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+		sudo iptables -A OUTPUT -o enp1s0 -p tcp -m multiport --sport 22,80,443 -j ACCEPT
+
+		sudo iptables -A INPUT -i enp1s0 -p tcp --tcp-flags ALL NONE -j DROP
+
+		sudo iptables -A INPUT -i enp1s0 -p tcp --tcp-flags PSH,URG,FIN PSH,URG,FIN -j REJECT
+
+		sudo iptables -A INPUT -p tcp -m state --state INVALID -j DROP
+
+		sudo iptables -A INPUT -p tcp -m connlimit --connlimit-above 100 -j DROP
+
+		sudo iptables -A INPUT -f -j DROP
+
+		sudo iptables -A INPUT -p icmp --icmp-type 8 -j DROP
+
+		sudo iptables -A INPUT -p icmp --icmp-type 13 -j DROP
+
+		sudo iptables -A INPUT -p icmp --icmp-type 14 -j DROP
+
+		sudo iptables -A INPUT -i enp1s0 -p tcp --syn -m limit --limit 100/minute --limit-burst 80 -j DROP
+
+		sudo iptables -P INPUT DROP
+
+		sudo iptables -P OUTPUT DROP
+
+		sudo iptables-save > /etc/iptables/rules.v4
+
+		echo "$green Frewall config is [ OK ]"
+
+
+	else
+		echo "Can Not Detect Version of OS [ ERROR ]"
+	fi
+fi
+
+
+
+echo ">> KYGnus_Map Installed <<"
