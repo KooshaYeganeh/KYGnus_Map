@@ -98,7 +98,7 @@ sudo mkdir KYGnus_Map
 
 cd KYGnus_Map
 
-ln -s /home/$user/Apps/KYGnus_Map/config.py KYGnus_Map.conf
+ln -s /opt/KYGnus_Map/config.py KYGnus_Map.conf
 
 cd
 
