@@ -54,8 +54,11 @@ echo "$yellow Installer File try to install python tools"
 # For Ubuntu or OpenSuse :
 # Note: if Get Error When Install requirements File remove versions of Packages and Try Again
 
-sudo pip install -r requirements.txt
+package=`cat ./requirements.txt | cut -d'=' -f1`
 
+for p in $package;do
+	pip install $p
+done
 
 echo "$green Python Tools and packages Installed [ OK ]"
 
