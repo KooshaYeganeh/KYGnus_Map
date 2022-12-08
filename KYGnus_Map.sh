@@ -1,4 +1,3 @@
-#!/usr/bin/bash
 
 
 cd /opt/KYGnus_Map
@@ -13,8 +12,8 @@ cd /opt/KYGnus_Map
 ##should consider in troubleshooting is changing the Python execution command
 
 Fedora=` cat /etc/os-release | grep -o fedora | head -1`
-Ubuntu=` cat /etc/os-release | grep -o fedora | head -1`
-OpenSuse=` cat /etc/os-release | grep -o fedora | head -1`
+Ubuntu=` cat /etc/os-release | grep -o ubuntu | head -1`
+OpenSuse=` cat /etc/os-release | grep -o suse | head -1`
 
 
 if [ "$Fedora" == "fedora" ];then
