@@ -13,7 +13,7 @@ Easly Create Map and Some Other Features
 **Ubuntu:**  
 `sudo apt install mariadb-server`  
 **OpenSuse:**  
-`sudo zypper install mariadb-server`  
+`sudo zypper install mariadb-server`<br /><br />
 3- Python & pip <br />  
 **Fedora:**  
 `sudo dnf install python-pip`  
