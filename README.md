@@ -24,6 +24,13 @@ Easly Create Map and Some Other Features
 
 
 
+Note: In order to be able to upload Excel, the format of the entered information must be as follows:
+
+Map Style: "Latitude", "Longitude", "Name"
+
+
+
+
 # Install
 
 Run KYGnus_Map_installer with sudo
