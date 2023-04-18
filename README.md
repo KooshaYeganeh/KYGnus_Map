@@ -1,20 +1,22 @@
 # KYGnus_Mapper
 Easly Create Map and Some Other Features
 
-![Screenshot](./static/screenshots/KYGnus_Map.png)
-![Screenshot](./static/screenshots/KYGnus_Map_Extensions.png)
+<img src="./app/static/screenshots/KYGnus_Map_Dashboard.png" height="100" width="180">
+<img src="./app/static/screenshots/KYGnus_Map_Create.png" height="100" width="180">
+<img src="./app/static/screenshots/KYGnus_Map_Extension.png" height="100" width="180">
+<img src="./app/static/screenshots/KYGnus_Map_Related.png" height="100" width="180"><br><br>
 
 
 
 
 
-- [Basic Requirements]()
-- [Install]()
-- [Remove]()
-- [Docker]()
-    - [Download]()
-    - [Build]()
-    - [Run]()
+- [Basic Requirements](https://github.com/KooshaYeganeh/KYGnus_Map#basic-requirements)
+- [Install](https://github.com/KooshaYeganeh/KYGnus_Map#install)
+- [Remove](https://github.com/KooshaYeganeh/KYGnus_Map#remove)
+- [Docker](https://github.com/KooshaYeganeh/KYGnus_Map#docker)
+    - [Download](https://github.com/KooshaYeganeh/KYGnus_Map#download)
+    - [Build](https://github.com/KooshaYeganeh/KYGnus_Map#build)
+    - [Run](https://github.com/KooshaYeganeh/KYGnus_Map#run)
 
 
 
