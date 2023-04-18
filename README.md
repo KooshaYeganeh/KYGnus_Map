@@ -1,10 +1,8 @@
 # KYGnus_Mapper
 Easly Create Map and Some Other Features
 
-<img src="./app/static/screenshots/KYGnus_Map_Dashboard.png" height="100" width="180">
-<img src="./app/static/screenshots/KYGnus_Map_Create.png" height="100" width="180">
-<img src="./app/static/screenshots/KYGnus_Map_Extension.png" height="100" width="180">
-<img src="./app/static/screenshots/KYGnus_Map_Related.png" height="100" width="180"><br><br>
+<img src="./app/static/screenshots/KYGnus_Map_Dashboard.png" height="350" width="700">
+<br><br>
 
 
 
