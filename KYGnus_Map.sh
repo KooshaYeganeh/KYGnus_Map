@@ -17,13 +17,13 @@ OpenSuse=` cat /etc/os-release | grep -o suse | head -1`
 
 
 if [ "$Fedora" == "fedora" ];then
-	sudo python app.py
+	sudo python app/main.py
 
 elif [ "$Ubuntu" == "ubuntu" ];then
-	sudo python3 app.py
+	sudo python3 app/main.py
 
 elif [ "$OpenSuse" == "opensuse" ];then
-	sudo python3 app.py
+	sudo python3 app/main.py
 fi
 
 
