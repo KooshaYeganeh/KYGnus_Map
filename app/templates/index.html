@@ -19,6 +19,38 @@
 
 	<link href="../static/css/app.css" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+	<link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    
+	
+
+	
+	
+	<style>
+        #map {
+            height: 300px; /* Adjust height as needed */
+            width: 100%;
+        }
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 16px;
+            margin: 16px;
+        }
+        .card-title {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        .mt-1 {
+            margin-top: 0.25rem;
+        }
+        .mb-3 {
+            margin-bottom: 1rem;
+        }
+    </style>
+
+
+
 </head>
 
 <body>
@@ -35,7 +67,7 @@
 					</li>
 
 					<li class="sidebar-item active">
-						<a class="sidebar-link" href="#">
+						<a class="sidebar-link" href="/home">
 							<i class="align-middle" data-feather="sliders"></i> <span
 								class="align-middle">Dashboard</span>
 						</a>
@@ -45,34 +77,41 @@
 
 					<li class="sidebar-item">
 						<a class="sidebar-link" href="/createmap">
-							<i class="align-middle me-2" data-feather="file-plus"></i> <span class="align-middle">Create
+							<i class="align-middle me-2" data-feather="plus"></i> <span class="align-middle">Create
 								Map</span>
 						</a>
 					</li>
 
+
 					<li class="sidebar-item">
-						<a class="sidebar-link" href="/related">
+						<a class="sidebar-link" href="/heatmap">
 							<i class="align-middle me-2" data-feather="plus"></i> <span
-								class="align-middle">Related</span>
+								class="align-middle">HeatMap</span>
 						</a>
 					</li>
 
 					<li class="sidebar-item">
-						<a class="sidebar-link" href="/documentation">
-							<i class="align-middle" data-feather="book"></i> <span
-								class="align-middle">Documentation</span>
-						</a>
-					</li>
-					<li class="sidebar-item">
-						<a class="sidebar-link" href="/user">
-							<i class="align-middle" data-feather="user"></i> <span class="align-middle">Admin
-								Dashboard</span>
+						<a class="sidebar-link" href="/tools">
+							<i class="align-middle me-2" data-feather="plus"></i> <span
+								class="align-middle">Tools</span>
 						</a>
 					</li>
 
-					<li class="sidebar-header">
-						Tools
+
+					<li class="sidebar-item">
+						<a class="sidebar-link" href="/location_prediction">
+							<i class="align-middle me-2" data-feather="plus"></i> <span
+								class="align-middle">Location Prediction</span>
+						</a>
 					</li>
+
+					<li class="sidebar-item">
+						<a class="sidebar-link" href="/variogram_kriging">
+							<i class="align-middle me-2" data-feather="plus"></i> <span
+								class="align-middle"> Variogram Modeling&Kriging</span>
+						</a>
+					</li>
+
 
 					<li class="sidebar-item">
 						<a class="sidebar-link" href="/analyzer">
@@ -85,32 +124,17 @@
 
 
 
-					<li class="sidebar-header">
-						Plugins & Addons
-					</li>
 
-					<li class="sidebar-item">
-						<a class="sidebar-link" href="/extensions">
-							<i class="align-middle" data-feather="bar-chart-2"></i> <span
-								class="align-middle">Extensions</span>
-						</a>
-					</li>
-
-					<li class="sidebar-item">
-						<a class="sidebar-link" href="/maps">
-							<i class="align-middle" data-feather="map"></i> <span class="align-middle">Maps</span>
-						</a>
-					</li>
 				</ul>
 
 				<div class="sidebar-cta">
 					<div class="sidebar-cta-content">
 						<strong class="d-inline-block mb-2">Download Latest Database</strong>
 						<div class="mb-3 text-sm">
-							You can Download Latest Version of Database of App Options
+							You can Download Latest Version of World City Locations 
 						</div>
 						<div class="d-grid">
-							<a href="/Download_lates" class="btn btn-primary">Download</a>
+							<a href="https://github.com/bahar/WorldCityLocations/archive/refs/heads/master.zip" class="btn btn-primary">Download</a>
 						</div>
 					</div>
 				</div>
@@ -122,6 +146,11 @@
 				<a class="sidebar-toggle js-sidebar-toggle">
 					<i class="hamburger align-self-center"></i>
 				</a>
+				<div>
+
+
+
+				</div>
 
 				<div class="navbar-collapse collapse">
 					<ul class="navbar-nav navbar-align">
@@ -130,17 +159,19 @@
 								data-bs-toggle="dropdown">
 								<i class="align-middle" data-feather="settings"></i>
 							</a>
+							
+
 
 							<a class="nav-link dropdown-toggle d-none d-sm-inline-block" href="#"
 								data-bs-toggle="dropdown">
-								<img src="../static/img/avatars/spaceX.jpg" class="avatar img-fluid rounded me-1"
-									alt="Koosha Yeganeh" /> <span class="text-dark"> Koosha Yeganeh </span>
+								<img src="../static/map_logo.png" class="avatar img-fluid rounded me-1"
+									alt="username" /> <span class="text-dark"> {{username}} </span>
 							</a>
 							<div class="dropdown-menu dropdown-menu-end">
-								<a class="dropdown-item" href="/user"><i class="align-middle me-1"
-										data-feather="user"></i> Profile</a>
+								<a class="dropdown-item" href="/https://gitlab.com/KooshaYeganeh/resume"><i class="align-middle me-1"
+										data-feather="user"></i> Koosha yeganeh</a>
 								<a class="dropdown-item" href="#"><i class="align-middle me-1"
-										data-feather="pie-chart"></i> Analytics</a>
+											data-feather="user"></i> Shahla Nasiri</a>
 								<div class="dropdown-divider"></div>
 								<a class="dropdown-item" href="/document"><i class="align-middle me-1"
 										data-feather="settings"></i> Document</a>
@@ -152,112 +183,23 @@
 						</li>
 					</ul>
 				</div>
+
+
+
+
 			</nav>
 
 			<main class="content">
 				<div class="container-fluid p-0">
-
+		
 					<h1 class="h3 mb-3"><strong>Main</strong> Dashboard</h1>
-
-					<div class="row">
-						<div class="col-xl-6 col-xxl-5 d-flex">
-							<div class="w-100">
-								<div class="row">
-									<div class="col-sm-6">
-										<div class="card">
-											<div class="card-body">
-												<div class="row">
-													<div class="col mt-0">
-														<h5 class="card-title">Number of Tables</h5>
-													</div>
-
-													<div class="col-auto">
-														<div class="stat text-primary">
-
-														</div>
-													</div>
-												</div>
-												<h1 class="mt-1 mb-3">{{number_of_tables}}</h1>
-											</div>
-										</div>
-										<div class="card">
-											<div class="card-body">
-												<div class="row">
-													<div class="col mt-0">
-														<h5 class="card-title">Number of Excel Files</h5>
-													</div>
-
-													<div class="col-auto">
-														<div class="stat text-primary">
-
-														</div>
-													</div>
-												</div>
-												<h1 class="mt-1 mb-3">{{number_of_excel_file}}</h1>
-												<div class="mb-0">
-												</div>
-											</div>
-										</div>
-									</div>
-									<div class="col-sm-6">
-										<div class="card">
-											<div class="card-body">
-												<div class="row">
-													<div class="col mt-0">
-														<h5 class="card-title">Number of Files</h5>
-													</div>
-
-													<div class="col-auto">
-														<div class="stat text-primary">
-
-														</div>
-													</div>
-												</div>
-												<h1 class="mt-1 mb-3">{{Number_of_Files}}</h1>
-											</div>
-										</div>
-										<div class="card">
-											<div class="card-body">
-												<div class="row">
-													<div class="col mt-0">
-														<h5 class="card-title">Number of Documents</h5>
-													</div>
-
-													<div class="col-auto">
-														<div class="stat text-primary">
-
-														</div>
-													</div>
-												</div>
-												<h1 class="mt-1 mb-3">{{number_of_Documents}}</h1>
-												<div class="mb-0">
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
+					<!-- <div class="col-md-12 col-12-8 col-xxl-12 d-flex">
+						<div class="card flex-fill">
+							<div class="input-group-prepend">
 							</div>
+							<input type="text" class="form-control" aria-label="Text input with checkbox" placeholder="Search Here">
 						</div>
-
-						<div class="col-xl-6 col-xxl-7">
-							<div class="card flex-fill w-100">
-								<div class="card-header">
-
-									<h5 class="card-title mb-0">Recent Info</h5>
-								</div>
-								<div class="card-body py-3">
-									<div class="content">
-										{{circular_table}} Record in circular Table and {{marker_table}} Record in
-										marker Table
-									</div>
-									<div class="chart chart-sm">
-										<canvas id="chartjs-dashboard-line"></canvas>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
+					</div> -->
 
 					<div class="row">
 						<div class="col-md-12 col-12-8 col-xxl-12 d-flex">
@@ -273,67 +215,84 @@
 											<th class="d-none d-xl-table-cell">Name</th>
 											<th>Latitude</th>
 											<th class="d-none d-md-table-cell">Longitude</th>
+											<th>Time</th>
 										</tr>
 									</thead>
 									<tbody>
-										<tr>
+										<tr data-timezone-offset="-4">
 											<td>1</td>
-											<td class="d-none d-xl-table-cell">Tabriz</td>
-											<td class="d-none d-xl-table-cell">50.24444</td>
-											<td class="d-none d-md-table-cell">40.25874</td>
-											<td><span class="badge bg-danger">Center</span></td>
+											<td class="d-none d-xl-table-cell">New York</td>
+											<td>40.7128</td>
+											<td class="d-none d-md-table-cell">-74.0060</td>
+											<td class="time"></td>
 										</tr>
-										<tr>
+										<tr data-timezone-offset="1">
 											<td>2</td>
-											<td class="d-none d-xl-table-cell">Tabriz</td>
-											<td class="d-none d-xl-table-cell">50.868622</td>
-											<td class="d-none d-md-table-cell">40.25875</td>
-											<td><span class="badge bg-danger">Center</span></td>
+											<td class="d-none d-xl-table-cell">London</td>
+											<td>51.5074</td>
+											<td class="d-none d-md-table-cell">-0.1278</td>
+											<td class="time"></td>
 										</tr>
-										<tr>
+										<tr data-timezone-offset="2">
 											<td>3</td>
-											<td class="d-none d-xl-table-cell">Tabriz</td>
-											<td class="d-none d-xl-table-cell">50.868622</td>
-											<td class="d-none d-md-table-cell">40.25875</td>
-											<td><span class="badge bg-danger">Center</span></td>
+											<td class="d-none d-xl-table-cell">Paris</td>
+											<td>48.8566</td>
+											<td class="d-none d-md-table-cell">2.3522</td>
+											<td class="time"></td>
 										</tr>
-										<tr>
+										<tr data-timezone-offset="9">
 											<td>4</td>
-											<td class="d-none d-xl-table-cell">Tabriz</td>
-											<td class="d-none d-xl-table-cell">50.868622</td>
-											<td class="d-none d-md-table-cell">40.25875</td>
-											<td><span class="badge bg-danger">Center</span></td>
+											<td class="d-none d-xl-table-cell">Tokyo</td>
+											<td>35.6895</td>
+											<td class="d-none d-md-table-cell">139.6917</td>
+											<td class="time"></td>
 										</tr>
-										<tr>
+										<tr data-timezone-offset="10">
 											<td>5</td>
-											<td class="d-none d-xl-table-cell">Tabriz</td>
-											<td class="d-none d-xl-table-cell">50.868622</td>
-											<td class="d-none d-md-table-cell">40.25875</td>
-											<td><span class="badge bg-danger">Center</span></td>
+											<td class="d-none d-xl-table-cell">Sydney</td>
+											<td>-33.8688</td>
+											<td class="d-none d-md-table-cell">151.2093</td>
+											<td class="time"></td>
 										</tr>
-										<tr>
+										<tr data-timezone-offset="4">
 											<td>6</td>
-											<td class="d-none d-xl-table-cell">Tabriz</td>
-											<td class="d-none d-xl-table-cell">50.868622</td>
-											<td class="d-none d-md-table-cell">40.25875</td>
-											<td><span class="badge bg-danger">Center</span></td>
+											<td class="d-none d-xl-table-cell">Dubai</td>
+											<td>25.2048</td>
+											<td class="d-none d-md-table-cell">55.2708</td>
+											<td class="time"></td>
 										</tr>
-										<tr>
+										<tr data-timezone-offset="2">
 											<td>7</td>
-											<td class="d-none d-xl-table-cell">Tabriz</td>
-											<td class="d-none d-xl-table-cell">50.868622</td>
-											<td class="d-none d-md-table-cell">40.25875</td>
-											<td><span class="badge bg-danger">Center</span></td>
+											<td class="d-none d-xl-table-cell">Rome</td>
+											<td>41.9028</td>
+											<td class="d-none d-md-table-cell">12.4964</td>
+											<td class="time"></td>
 										</tr>
-										<tr>
+										<tr data-timezone-offset="8">
 											<td>8</td>
-											<td class="d-none d-xl-table-cell">Tabriz</td>
-											<td class="d-none d-xl-table-cell">50.868622</td>
-											<td class="d-none d-md-table-cell">40.25875</td>
-											<td><span class="badge bg-danger">Center</span></td>
+											<td class="d-none d-xl-table-cell">Hong Kong</td>
+											<td>22.3193</td>
+											<td class="d-none d-md-table-cell">114.1694</td>
+											<td class="time"></td>
+										</tr>
+
+										<tr data-timezone-offset="8">
+											<td>9</td>
+											<td class="d-none d-xl-table-cell">Berlin</td>
+											<td>52.5200</td>
+											<td class="d-none d-md-table-cell">13.4050</td>
+											<td class="time"></td>
+										</tr>
+										<tr data-timezone-offset="3">
+											<td>10</td>
+											<td class="d-none d-xl-table-cell">Istanbul</td>
+											<td>41.0082</td>
+											<td class="d-none d-md-table-cell">28.9784</td>
+											<td class="time"></td>
 										</tr>
 									</tbody>
 								</table>
+								
 							</div>
 						</div>
 					</div>
@@ -353,18 +312,12 @@
 						<div class="col-6 text-end">
 							<ul class="list-inline">
 								<li class="list-inline-item">
-									<a class="text-muted" href="/support" target="_blank">Support</a>
+									<a class="text-muted" href="https://kooshayeganeh.github.io/" target="_blank">website</a>
 								</li>
 								<li class="list-inline-item">
-									<a class="text-muted" href="/help-center" target="_blank">Help Center</a>
+									<a class="text-muted" href="https://github.com/KooshaYeganeh/KYGnus_Map" target="_blank">GitHub</a>
 								</li>
-								<li class="list-inline-item">
-									<a class="text-muted" href="http://wwww.github.com/KoosshaYeganeh"
-										target="_blank">Developer</a>
-								</li>
-								<li class="list-inline-item">
-									<a class="text-muted" href="http://realsepta.ir" target="_blank">Team</a>
-								</li>
+
 							</ul>
 						</div>
 					</div>
@@ -375,215 +328,10 @@
 
 	<script src="../static/js/app.js"></script>
 
-	<script>
-		document.addEventListener("DOMContentLoaded", function () {
-			var ctx = document.getElementById("chartjs-dashboard-line").getContext("2d");
-			var gradient = ctx.createLinearGradient(0, 0, 0, 225);
-			gradient.addColorStop(0, "rgba(215, 227, 244, 1)");
-			gradient.addColorStop(1, "rgba(215, 227, 244, 0)");
-			// Line chart
-			new Chart(document.getElementById("chartjs-dashboard-line"), {
-				type: "line",
-				data: {
-					labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-					datasets: [{
-						label: "Sales ($)",
-						fill: true,
-						backgroundColor: gradient,
-						borderColor: window.theme.primary,
-						data: [
-							2115,
-							1562,
-							1584,
-							1892,
-							1587,
-							1923,
-							2566,
-							2448,
-							2805,
-							3438,
-							2917,
-							3327
-						]
-					}]
-				},
-				options: {
-					maintainAspectRatio: false,
-					legend: {
-						display: false
-					},
-					tooltips: {
-						intersect: false
-					},
-					hover: {
-						intersect: true
-					},
-					plugins: {
-						filler: {
-							propagate: false
-						}
-					},
-					scales: {
-						xAxes: [{
-							reverse: true,
-							gridLines: {
-								color: "rgba(0,0,0,0.0)"
-							}
-						}],
-						yAxes: [{
-							ticks: {
-								stepSize: 1000
-							},
-							display: true,
-							borderDash: [3, 3],
-							gridLines: {
-								color: "rgba(0,0,0,0.0)"
-							}
-						}]
-					}
-				}
-			});
-		});
-	</script>
-	<script>
-		document.addEventListener("DOMContentLoaded", function () {
-			// Pie chart
-			new Chart(document.getElementById("chartjs-dashboard-pie"), {
-				type: "pie",
-				data: {
-					labels: ["Chrome", "Firefox", "IE"],
-					datasets: [{
-						data: [4306, 3801, 1689],
-						backgroundColor: [
-							window.theme.primary,
-							window.theme.warning,
-							window.theme.danger
-						],
-						borderWidth: 5
-					}]
-				},
-				options: {
-					responsive: !window.MSInputMethodContext,
-					maintainAspectRatio: false,
-					legend: {
-						display: false
-					},
-					cutoutPercentage: 75
-				}
-			});
-		});
-	</script>
-	<script>
-		document.addEventListener("DOMContentLoaded", function () {
-			// Bar chart
-			new Chart(document.getElementById("chartjs-dashboard-bar"), {
-				type: "bar",
-				data: {
-					labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-					datasets: [{
-						label: "This year",
-						backgroundColor: window.theme.primary,
-						borderColor: window.theme.primary,
-						hoverBackgroundColor: window.theme.primary,
-						hoverBorderColor: window.theme.primary,
-						data: [54, 67, 41, 55, 62, 45, 55, 73, 60, 76, 48, 79],
-						barPercentage: .75,
-						categoryPercentage: .5
-					}]
-				},
-				options: {
-					maintainAspectRatio: false,
-					legend: {
-						display: false
-					},
-					scales: {
-						yAxes: [{
-							gridLines: {
-								display: false
-							},
-							stacked: false,
-							ticks: {
-								stepSize: 20
-							}
-						}],
-						xAxes: [{
-							stacked: false,
-							gridLines: {
-								color: "transparent"
-							}
-						}]
-					}
-				}
-			});
-		});
-	</script>
-	<script>
-		document.addEventListener("DOMContentLoaded", function () {
-			var markers = [{
-				coords: [31.230391, 121.473701],
-				name: "Shanghai"
-			},
-			{
-				coords: [28.704060, 77.102493],
-				name: "Delhi"
-			},
-			{
-				coords: [6.524379, 3.379206],
-				name: "Lagos"
-			},
-			{
-				coords: [35.689487, 139.691711],
-				name: "Tokyo"
-			},
-			{
-				coords: [23.129110, 113.264381],
-				name: "Guangzhou"
-			},
-			{
-				coords: [40.7127837, -74.0059413],
-				name: "New York"
-			},
-			{
-				coords: [34.052235, -118.243683],
-				name: "Los Angeles"
-			},
-			{
-				coords: [41.878113, -87.629799],
-				name: "Chicago"
-			},
-			{
-				coords: [51.507351, -0.127758],
-				name: "London"
-			},
-			{
-				coords: [40.416775, -3.703790],
-				name: "Madrid "
-			}
-			];
-			var map = new jsVectorMap({
-				map: "world",
-				selector: "#world_map",
-				zoomButtons: true,
-				markers: markers,
-				markerStyle: {
-					initial: {
-						r: 9,
-						strokeWidth: 7,
-						stokeOpacity: .4,
-						fill: window.theme.primary
-					},
-					hover: {
-						fill: window.theme.primary,
-						stroke: window.theme.primary
-					}
-				},
-				zoomOnScroll: false
-			});
-			window.addEventListener("resize", () => {
-				map.updateSize();
-			});
-		});
-	</script>
+
+
+
+
 	<script>
 		document.addEventListener("DOMContentLoaded", function () {
 			var date = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000);
@@ -596,6 +344,30 @@
 			});
 		});
 	</script>
+
+
+<script>
+	function updateTimes() {
+		const now = new Date();
+		const rows = document.querySelectorAll('tr[data-timezone-offset]');
+
+		rows.forEach(row => {
+			const offset = parseInt(row.getAttribute('data-timezone-offset'));
+			const cityTime = new Date(now.getTime() + (offset * 60 * 60 * 1000));
+			const hours = cityTime.getUTCHours().toString().padStart(2, '0');
+			const minutes = cityTime.getUTCMinutes().toString().padStart(2, '0');
+			row.querySelector('.time').textContent = `${hours}:${minutes}`;
+		});
+	}
+
+	window.addEventListener('load', updateTimes);
+</script>
+
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+
+
 
 </body>
 
