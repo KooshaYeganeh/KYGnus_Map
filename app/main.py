@@ -11,9 +11,9 @@ import glob
 import re
 import getpass
 from flask import Flask, Response, redirect, session, abort
-from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user
+from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user , current_user
 from types import MethodDescriptorType
-from flask import Flask, render_template, request, url_for
+from flask import Flask, render_template, request, url_for , render_template_string , flash , jsonify, make_response
 from flask_limiter import Limiter
 from flask import send_file
 from flask_limiter.util import get_remote_address
@@ -30,12 +30,46 @@ import pipes
 import config
 import pdfkit
 from pathlib import Path
+from geopy.geocoders import Nominatim
+import geopandas as gpd
+import matplotlib.pyplot as plt  
+import geopandas as gpd
+from werkzeug.utils import secure_filename
+import os
+from pyproj import Proj, transform
+from shapely.geometry import Point, Polygon
+from haversine import haversine, Unit
+from tempfile import NamedTemporaryFile
+import json
+from folium.plugins import HeatMap
+from obspy import read
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+from datetime import datetime, timedelta
+import io
+import base64
+
+
+
+
+
+
+
 
 
 app = Flask(__name__)
 
+username = getpass.getuser()  # Get username of system
 
-logdir = os.path.join(f"/opt/KYGnus_Map/LOG")
+
+
+appdir = os.path.join(f"/home/{username}/Apps/KYGnus_Map")
+os.makedirs(appdir, exist_ok=True)
+
+
+
+logdir = os.path.join(f"/home/{username}/Apps/KYGnus_Map/LOG")
 os.makedirs(logdir, exist_ok=True)
 
 
@@ -64,239 +98,119 @@ logger.info(Fore.GREEN + """
             """)
 
 
-# connect to MariaDB
-
-try:
-    logger.info(Fore.YELLOW + "[ INFO ] connecting to database")
-    db = pymysql.connect(host=config.DB_HOST,
-                         user=config.DB_USER,
-                         passwd=config.DB_PASSWORD,
-                         db=config.DB,
-                         port=config.DB_PORT,
-                         charset='utf8',
-                         use_unicode=True)
-except:
-    logger.warning(Fore.YELLOW + "[ Warning ] Could not connect to database")
-    print("ERROR on connecting to mariaDB")
 
 
-username = getpass.getuser()  # Get username of system
-logger.info(
-    Fore.YELLOW + f"[ INFO ] Get username of system: This Username is {username}")
+
+
 
 
 # Create Directory For App
-appdir = os.path.join(f"/opt/KYGnus_Map")
+appdir = os.path.join(f"/home/{username}/Apps/KYGnus_Map")
 os.makedirs(appdir, exist_ok=True)
 logger.info(Fore.YELLOW + "[ INFO ] App Create Directory in Home of username")
 
 
 # Create Directory For Filed in App Directory
 """ make Directory For Files in user Direcory If Exist pass it"""
-Filespath = os.path.join("/opt/KYGnus_Map/Files")
+Filespath = os.path.join(f"/home/{username}/Apps/KYGnus_Map/Files")
 os.makedirs(Filespath, exist_ok=True)
 logger.info(Fore.YELLOW +
-            f"[ INFO ] Making Directory for Files in /opt/KYGnus_Map")
+            f"[ INFO ] Making Directory for Files in /home/{username}/Apps/KYGnus_Map")
 
 
 """ make Directory For  Excel Files in user Direcory If Exist pass it"""
-excel_files_path = os.path.join("/opt/KYGnus_Map/Files/Excel")
+excel_files_path = os.path.join(f"/home/{username}/Apps/KYGnus_Map/Files/Excel")
 os.makedirs(excel_files_path, exist_ok=True)
 logger.info(Fore.YELLOW +
-            f"[ INFO ] Making Directory for Excel Files in /opt/KYGnus_Map/Files")
+            f"[ INFO ] Making Directory for Excel Files in /home/{username}/Apps/KYGnus_Map/Files")
 
 
 """ make Directory For CIrcular Markger Excel Files in user Direcory If Exist pass it"""
 excel_marker_files_path = os.path.join(
-    "/opt/KYGnus_Map/Files/Excel/marker")
+    f"/home/{username}/Apps/KYGnus_Map/Files/Excel/marker")
 os.makedirs(excel_marker_files_path, exist_ok=True)
 logger.info(Fore.YELLOW +
-            f"[ INFO ] Making xDirectory for Excel Files in /opt/KYGnus_Map/Files")
+            f"[ INFO ] Making xDirectory for Excel Files in /home/{username}/Apps/KYGnus_Map/Files")
 
 """ make Directory For circular marker Excel Files in user Direcory If Exist pass it"""
 excel_cmarker_files_path = os.path.join(
-    "/opt/KYGnus_Map/Files/Excel/circular")
+    f"/home/{username}/Apps/KYGnus_Map/Files/Excel/circular")
 os.makedirs(excel_cmarker_files_path, exist_ok=True)
 logger.info(Fore.YELLOW +
-            f"[ INFO ] Making Directory for Excel Files in /opt/KYGnus_Map/Files")
+            f"[ INFO ] Making Directory for Excel Files in /home/{username}/Apps/KYGnus_Map/Files")
 
 
 """ make Directory For doc Files in user Direcory If Exist pass it"""
-doc_files_path = os.path.join("/opt/KYGnus_Map/Files/Documents")
-os.makedirs(doc_files_path, exist_ok=True)
+upload_path = os.path.join(f"/home/{username}/Apps/KYGnus_Map/Files/Uploads")
+os.makedirs(upload_path, exist_ok=True)
 logger.info(Fore.YELLOW +
-            f"[ INFO ] Making Directory for doc Files in /opt/KYGnus_Map/Files")
-
-
-""" make Directory For Files in user Direcory If Exist pass it"""
-backup_path = os.path.join("/opt/KYGnus_Map/Files/Backup")
-os.makedirs(backup_path, exist_ok=True)
-logger.info(Fore.YELLOW +
-            f"[ INFO ] Making Directory for doc Files in /opt/KYGnus_Map/Files/Backup")
-
-
-""" make Directory For DB Backup Files in user Direcory If Exist pass it"""
-db_backup_path = os.path.join("/opt/KYGnus_Map/Files/Backup/DB")
-os.makedirs(db_backup_path, exist_ok=True)
-logger.info(Fore.YELLOW +
-            f"[ INFO ] Making Directory for doc Files in /opt/KYGnus_Map/Files/Backup/DB")
+            f"[ INFO ] Making Directory for Uploaded Files in /home/{username}/Apps/KYGnus_Map/Files")
 
 
 
 
-def check_db():
-    db = pymysql.connect(host=config.DB_HOST,
-                         user=config.DB_USER,
-                         passwd=config.DB_PASSWORD,
-                         db=config.DB,
-                         port=config.DB_PORT,
-                         charset='utf8',
-                         use_unicode=True)
-    cur = db.cursor()
-    cur.execute("SHOW TABLES")
-    data = cur.fetchall()
-    db.close()
-    return data
 
 
-if re.search("map_circular", str(check_db())):
-    logger.info(Fore.CYAN + "[ DB_check ] =>  map_circular Table is Exists")
-else:
-    db = pymysql.connect(host=config.DB_HOST,
-                         user=config.DB_USER,
-                         passwd=config.DB_PASSWORD,
-                         db=config.DB,
-                         port=config.DB_PORT,
-                         charset='utf8',
-                         use_unicode=True)
-    cur = db.cursor()
-    cur.execute(
-        """CREATE TABLE map_circular (Number VARCHAR(100) , Name VARCHAR(1000),
-        Address VARCHAR(1000),
-        Longitude VARCHAR(500) ,
-        Latitude VARCHAR(500))
-""")
-    db.close()
-    logger.info(
-        Fore.YELLOW + " [ DB_check ] => map_circular Table Created in Mapper Database")
 
 
-if re.search("map_marker", str(check_db())):
-    logger.info(Fore.CYAN + "[ DB_check ] =>  map_marker Table is Exists")
-else:
-    db = pymysql.connect(host=config.DB_HOST,
-                         user=config.DB_USER,
-                         passwd=config.DB_PASSWORD,
-                         db=config.DB,
-                         port=config.DB_PORT,
-                         charset='utf8',
-                         use_unicode=True)
-    cur = db.cursor()
-    cur.execute("""CREATE TABLE map_marker(Number VARCHAR(100) , Name VARCHAR(1000),
-        Address VARCHAR(1000),
-        Longitude VARCHAR(500) ,
-        Latitude VARCHAR(500))
-""")
-    db.close()
-    logger.info(
-        Fore.YELLOW + " [ DB_check ] => map_marker Table Created in mapper Database")
 
 
-# check number of Tables in mapper
-""" This Functions check Files and Database and return valid Data
-for showing information in Index Page"""
 
 
-def check_tables():
-    db = pymysql.connect(host=config.DB_HOST,
-                         user=config.DB_USER,
-                         passwd=config.DB_PASSWORD,
-                         db=config.DB,
-                         port=config.DB_PORT,
-                         charset='utf8',
-                         use_unicode=True)
-    cur = db.cursor()
-    cur.execute("SHOW TABLES")
-    data = cur.fetchall()
-    db.close()
-    return len(data)
+
+
+
+
+
 
 
 # check Number of Files
 
 def number_of_files():
     files = glob.glob(f"{Filespath}/**/*.*", recursive=True)
-    number_files = len(files)
-    return number_files
-
-
-# check Number of excel files
+    return len(files)
 
 def number_of_excel_files():
-    files = glob.glob(f"{excel_files_path}/**/*.*", recursive=True)
-    number_files = len(files)
-    return number_files
-
-
-# check Number of text files
-
-def number_of_txt_files():
-    files = glob.glob(f"{doc_files_path}/**/*.*", recursive=True)
-    number_files = len(files)
-    return number_files
-
-
-# check Number of map circular
-def number_of_circular_table():
-    roll = 5
-    con = pymysql.connect(host=config.DB_HOST,
-                          database=config.DB,
-                          user=config.DB_USER,
-                          port=config.DB_PORT,
-                          password=config.DB_PASSWORD)
-    cur = con.cursor()
-    cur.execute("SELECT * FROM map_circular")
-    cur.fetchall()
-    rc = cur.rowcount
-    cur.close()
-    return rc
-
-
-# check Number of map marker
-def number_of_marker_table():
-    roll = 5
-    con = pymysql.connect(host=config.DB_HOST,
-                          database=config.DB,
-                          user=config.DB_USER,
-                          port=config.DB_PORT,
-                          password=config.DB_PASSWORD)
-    cur = con.cursor()
-    cur.execute("SELECT * FROM map_marker")
-    cur.fetchall()
-    rc = cur.rowcount
-    cur.close()
-    return rc
-
+    files = glob.glob(f"{excel_files_path}/**/*.csv", recursive=True)
+    return len(files)
 
 def number_of_maps():
-    maps = glob.glob("./templates/maps/**/*.html", recursive=True)
-    num_maps = len(maps)
-    return num_maps
+    maps_path = "./templates/maps"
+    if not os.path.exists(maps_path):
+        print(f"The directory {maps_path} does not exist.")
+        return 0
+    maps = glob.glob(os.path.join(maps_path, "**/*.html"), recursive=True)
+    return len(maps)
+
+def number_of_modules():
+    modules_path = os.path.abspath("../Modules")
+    if not os.path.exists(modules_path):
+        print(f"The directory {modules_path} does not exist.")
+        return 0
+    modules = glob.glob(os.path.join(modules_path, "**/*.*"), recursive=True)
+    return len(modules)
 
 
-def number_of_document_files():
-    docfiles = glob.glob(f"{doc_files_path}/**/*.docx")
-    txtfiles = glob.glob(f"{doc_files_path}/**/*.txt")
-    num_doc_files = len(docfiles) + len(txtfiles)
-    return num_doc_files
+
+
+
+
+allowed_formats = {"csv" , "txt"}  # allowed file types
+
+
+# Secure File name
+def check_files(filename):
+    return "." in filename and filename.rsplit(".", 1)[1] in allowed_formats
+
+
 
 
 # Flask limiter
 """ Limit the number of requests to the server """
 limiter = Limiter(
     app,
-    key_func=get_remote_address,
-    default_limits=["1000 per day", "500 per hour"]
+    # key_func=get_remote_address,
+    default_limits=["50 per day", "10 per hour"]
 )
 
 app.config.update(
@@ -308,82 +222,77 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
+# Configure rate limiting
+
+
+# Set up logging
+logging.basicConfig(level=logging.WARNING)
+logger = logging.getLogger(__name__)
 
 class User(UserMixin):
-
     def __init__(self, id):
         self.id = id
 
     def __repr__(self):
         return "%d" % (self.id)
 
-
-user = User(0)
-
-
-@ app.route("/")
-@ login_required
-def loogin():
-    return render_template("index.html")
-
-
-@ app.route("/login")
-def login():
-    return render_template("login.html")
-
-
-@ app.route("/login", methods=["POST"])
-# This Limits Requests to Prevent BruteForce Attack
-@ limiter.limit("5 per minutes")
-def loggin():
-    username = request.form["username"]
-    password = request.form["password"]
-    if username == config.USERNAME and password == config.PASSWORD:
-        logger.warning(Fore.RED + "user Try ro login")
-        time.sleep(5)
-        return render_template("index.html", Number_of_Files=number_of_files(),
-                               number_of_Documents=number_of_txt_files(),
-                               number_of_excel_file=number_of_excel_files(),
-                               number_of_tables=check_tables(),
-                               circular_table=number_of_circular_table(),
-                               marker_table=number_of_marker_table())
-    else:
-        logger.warning(
-            Fore.RED + "[ Warning ] Login Faild.system redirect User to /login")
-        return redirect("/login")
-
-
-@ app.route("/logout")
-@ login_required
-def logout():
-    logout_user()
-    logger.info(Fore.YELLOW + "[ INFO ] user logout")
-    return Response('<p>Logged out</p>')
-
-
-@ app.errorhandler(401)
-def page_not_found(e):
-    logger.warning(Fore.RED + "[ Warning ] 401 Error")
-    return Response('<center><h1>Login Failed</h1><center>')
-
-
-@ login_manager.user_loader
+@login_manager.user_loader
 def load_user(userid):
     return User(userid)
 
 
-allowed_formats = {"csv"}  # allowed file types
+@app.route("/")
+@login_required
+def index():
+    return render_template(
+        "index.html",
+        username=current_user.id,
+        number_of_files=number_of_files(),
+        number_of_excel_files=number_of_excel_files(),
+        number_of_maps=number_of_maps(),
+        number_of_modules=number_of_modules()
+    )
+
+@app.route("/login")
+def login():
+    return render_template("login.html")
+
+@app.route("/login", methods=["POST"])
+@limiter.limit("5 per minute")
+def loggin():
+    username = request.form["username"]
+    password = request.form["password"]
+    if username == config.USERNAME and password == config.PASSWORD:
+        logger.warning(Fore.RED + "User tried to login")
+        user = User(username)
+        login_user(user)
+        return redirect('/')
+    else:
+        logger.warning(Fore.RED + "[Warning] Login failed. System redirecting user to /login")
+        return redirect("/login")
 
 
-# Secure File name
-def check_files(filename):
-    return "." in filename and filename.rsplit(".", 1)[1] in allowed_formats
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    logger.info(Fore.YELLOW + "[INFO] User logged out")
+    return Response('<p>Logged out</p>')
+
+
+
+@app.errorhandler(401)
+def unauthorized(e):
+    logger.warning(Fore.RED + "[Warning] 401 Error")
+    return Response('<center><h1>Login Failed</h1></center>')
+
 
 
 @ app.route("/createmap")
 def createmap():
     logger.info(Fore.CYAN + "[ Info ] Loading Create Map Page")
-    return render_template("createmap.html")
+    return render_template("createmap.html" , username = username)
 
 
 """ This Route Create Route For main Map Without Any Marks
@@ -393,7 +302,7 @@ This Will be Get Lat and Long and Create Map in That Locations"""
 @ app.route("/createmap/createmainmap")
 def create_main_map():
     logger.info(Fore.CYAN + "[ Info ] Loading Create Map Page")
-    return render_template("main_map_creator.html")
+    return render_template("main_map_creator.html" , username = username)
 
 
 # TODO : create Template For main Map
@@ -479,313 +388,452 @@ def cmarker():
             return Response("<html><body style='background-color:white;'><center ><h1 style='color:red;'> Can't Process Excel File !!!</h1><h2> Please Check File Type and Format Or Sure This File Design is True</center></html></body>")
 
 
-# Related
-""" this Route Show Related Sites Like this Map , This is Have Sites
-and Their Link Can Download Data or Use Informations of This Sites"""
+
+@app.route("/tools")
+def addresses_into_coordinates_get():
+    return render_template("tools.html", Number_of_Files=number_of_files(),
+                               number_of_modules=number_of_modules(),
+                               number_of_excel_file=number_of_excel_files(), username = username)
 
 
-@ app.route("/related")
-def related():
-    logger.info(Fore.YELLOW + "[ Info ] Get related template")
-    return render_template("related.html")
+
+@app.route("/tools/addresses_into_coordinates" , methods=["POST"])
+def addresses_into_coordinates():
+    coordinates = None
+    if request.method == 'POST':
+        address = request.form['address']
+        geolocator = Nominatim(user_agent="geoapiExercises")
+        location = geolocator.geocode(address)
+        if location:
+            coordinates = (location.latitude, location.longitude)
+    
+    return Response('''
+        <!doctype html>
+        <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+            <title>Geocode Address</title>
+          </head>
+          <body>
+            <div class="container">
+              <h1 class="mt-5">Geocode Address</h1>
+              <form method="post">
+                <div class="form-group">
+                  <label for="address">Enter an address:</label>
+                  <input type="text" class="form-control" id="address" name="address" placeholder="Enter address">
+                </div>
+                <button type="submit" class="btn btn-primary">Geocode</button>
+              </form>
+              {% if coordinates %}
+                <h2 class="mt-5">Coordinates:</h2>
+                <p>Latitude: {{ coordinates[0] }}</p>
+                <p>Longitude: {{ coordinates[1] }}</p>
+              {% endif %}
+            </div>
+          </body>
+        </html>
+    ''', coordinates=coordinates)
 
 
-# Download Files
 
-# wget https://github.com/jadijadi/machine_learning_with_python_jadi/archive/refs/heads/main.zip
-
-
-# Extensions
-""" at This route You Can Download Extensions Like WordPress
-"""
-
-
-@ app.route("/extensions")
-def extensions_get():
-    logger.info(Fore.YELLOW + "[ Info ] Get extensions template")
-    return render_template("extensions.html")
-
-
-@ app.route("/extensions/fs", methods=["POST"])
-def extensions_fs():
-    opt = os.popen("cd /opt").read()
-    mainzip = os.popen(
-        "wget https://github.com/KooshaYeganeh/FS/archive/refs/heads/main.zip").read()
-    unzip = os.popen("unzip main.zip").read()
-    fs = os.popen("cd FS-main").read()
-    usr_bin = os.popen("sudo cp sort /usr/bin").read()
-    cd = os.popen("cd").read()
-    print(opt, mainzip, unzip, fs, usr_bin, cd)
-    logger.info(Fore.YELLOW + "[ Info ] FS App installed")
-    return Response("""<html style='background-color:#FFFACD;'><body>
-                    <center>
-                    <h3 style='color: #696969;'> KYGnus Fs </h3>
-                    <h1 style='color: #696969 ; '> KYGnus Fs Installed Successfully</h1>
-                    <h2> This App installed From Github</h2>
-					 <img src='./static/GitHub-Mark-120px-plus.png' alt='Github' width="200" height="200">
-					<div style='margin-top:20px;'>
-					<a href='/main'><button class='return' style='background-color:#98FB98;
-  border: none;
-  color: black;
-  padding: 10px 32px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  transition-duration: 0.4s;
-  cursor: pointer;'>
-  Return</button></a>
-     </div>
-     </center>
-     </body>
-     </center>
-                    """)
+html_template = '''
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GeoPandas Plot</title>
+</head>
+<body>
+    <h1>Customize GeoPandas Plot</h1>
+    <form action="/" method="post">
+        <label for="country">Country (optional):</label><br>
+        <input type="text" id="country" name="country" placeholder="e.g., Finland"><br><br>
+        <label for="coordinates">Coordinates (optional, format: lat,lon):</label><br>
+        <input type="text" id="coordinates" name="coordinates" placeholder="e.g., 37.7749,-122.4194"><br><br>
+        <label for="figsize">Figure Size (width, height):</label><br>
+        <input type="text" id="figsize" name="figsize" value="10, 6"><br><br>
+        <label for="color">Color:</label><br>
+        <input type="text" id="color" name="color" value="blue"><br><br>
+        <label for="alpha">Alpha (transparency):</label><br>
+        <input type="text" id="alpha" name="alpha" value="0.6"><br><br>
+        <input type="submit" value="Generate Plot">
+    </form>
+    {% if plot_url %}
+        <h2>Generated Plot:</h2>
+        <img src="{{ plot_url }}" alt="GeoPandas Plot">
+    {% endif %}
+</body>
+</html>
+'''
 
 
-@ app.route("/extensions/clamav", methods=["POST"])
-def clamav_install():
-    update = os.popen("sudo apt update -y").read()
-    install = os.popen("sudo apt-get install clamav clamav-daemon -y").read()
-    updatedb = os.popen("sudo freshclam").read()
-    print(update, install, updatedb)
-    logger.info(Fore.YELLOW + "[ Info ] clamAV Installed")
-    return Response("""<html style='background-color:black;'><body>
-                    <center>
-                    <h3 style='color: #B22222;'> ClamAV </h3>
-                    <h1 style='color: #B22222 ; '> ClamAV Installed Successfully</h1>
-                    <h2 style='color: #B22222 ; '> This App installed From Repository</h2>
-					 <img src='./static/clamav.png' alt='Github' width="250" height="250">
-					<div style='margin-top:20px;'>
-					<a href='/main'><button class='return' style='background-color:#FF4500;
-  border: none;
-  color: white;
-  padding: 10px 32px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  transition-duration: 0.4s;
-  cursor: pointer;'>
-  Return</button></a>
-     </div>
-     </center>
-     </body>
-     </center>
-                    """)
 
 
-@ app.route("/extensions/maldet", methods=["POST"])
-def maldet():
-    update = os.popen("sudo apt update -y").read()
-    chdir = os.popen("cd /tmp").read()
-    getfile = os.popen(
-        "wget http://www.rfxn.com/downloads/maldetect-current.tar.gz").read()
-    unzip = os.popen("tar xfz maldetect-current.tar.gz").read()
-    chmaldet = os.popen("cd maldetect-1.6.4").read()
-    install = os.popen("./install").read()
-    print(update, chdir, getfile, unzip, chmaldet, install)
-    logger.info(Fore.YELLOW + "[ Info ] maldet Installed")
-    return Response("""<html style='background-color:black;'><body>
-                    <center>
-                    <h3 style='color: #B22222;'> Maldet </h3>
-                    <h1 style='color: #B22222 ; '> Malware Detect Installed Successfully</h1>
-                    <h2 style='color: #B22222 ; '> This App installed From Repository</h2>
-					 <img src='./static/clamav.png' alt='Github' width="250" height="250">
-					<div style='margin-top:20px;'>
-					<a href='/main'><button class='return' style='background-color:#FF4500;
-  border: none;
-  color: white;
-  padding: 10px 32px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  transition-duration: 0.4s;
-  cursor: pointer;'>
-  Return</button></a>
-     </div>
-     </center>
-     </body>
-     </center>
-                    """)
+@app.route("/tools/geopands")
+def geopands():
+    return render_template("tools.html")
 
 
-@ app.route("/extensions/rkhunter", methods=["POST"])
-def rkhunter():
-    update = os.popen("sudo apt update -y").read()
-    install = os.popen("sudo apt install rkhunter -y").read()
-    print(update, install)
-    logger.info(Fore.YELLOW + "[ Info ] RootKit Hunter Installed")
-    return Response("""<html style='background-color:#A9A9A9;'><body>
-                    <center>
-                    <h3 style='color: black;'> RKHunter </h3>
-                    <h1 style='color: #696969 ; '> RKhunter Installed Successfully</h1>
-                    <h2> This App installed From Repository</h2>
-					 <img src='./static/Linux+security_rkhunter.jpg' alt='Github' width="500" height="300">
-					<div style='margin-top:20px;'>
-					<a href='/main'><button class='return' style='background-color:#98FB98;
-  border: none;
-  color: black;
-  padding: 10px 32px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  transition-duration: 0.4s;
-  cursor: pointer;'>
-  Return</button></a>
-     </div>
-     </center>
-     </body>
-     </center>
-                    """)
+@app.route("/tools/geopands" , methods=["POST"])
+def plot_world():
+    plot_url = None
+    if request.method == 'POST':
+        try:
+            # Get user inputs
+            country = request.form.get('country')
+            coordinates = request.form.get('coordinates')
+            figsize = tuple(map(float, request.form.get('figsize', '10,6').split(',')))
+            color = request.form.get('color', 'blue')
+            alpha = float(request.form.get('alpha', '0.6'))
+
+            # Load the dataset
+            world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
+            
+            # Create the plot
+            fig, ax = plt.subplots(1, 1, figsize=figsize)
+            world.plot(ax=ax, color=color, alpha=alpha)
+
+            # Highlight the specified country
+            if country:
+                country_data = world[world['name'].str.contains(country, case=False)]
+                if not country_data.empty:
+                    country_data.plot(ax=ax, color='red')
+
+            # Highlight the specified coordinates
+            if coordinates:
+                lat, lon = map(float, coordinates.split(','))
+                ax.plot(lon, lat, 'ro', markersize=10)  # Plot as a red dot
+
+            # Save the plot to a file
+            plot_path = 'static/world_plot.png'
+            if not os.path.exists('static'):
+                os.makedirs('static')
+            plt.savefig(plot_path)
+            plt.close(fig)
+            
+            plot_url = plot_path
+        except Exception as e:
+            return f"An error occurred: {e}", 500
+
+    return render_template_string(html_template, plot_url=plot_url)
 
 
-@ app.route("/extensions/lynis", methods=["POST"])
-def lynis():
-    update = os.popen("sudo apt update -y").read()
-    install = os.popen.read("sudo apt install lynis").read()
-    print(update, install)
-    logger.info(Fore.YELLOW + "[ Info ] Lynis Installed")
-    return Response("""<html style='background-color:#A9A9A9;'><body>
-                    <center>
-                    <h3 style='color: #FF4500;'> Lynis </h3>
-                    <h1 style='color: #696969 ; '> Lynis Installed Successfully</h1>
-                    <h2> This App installed From Repository</h2>
-					 <img src='./static/lynis.svg' alt='Github' width="500" height="300">
-					<div style='margin-top:20px;'>
-					<a href='/main'><button class='return' style='background-color:#FF4500;
-  border: none;
-  color: black;
-  padding: 10px 32px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  transition-duration: 0.4s;
-  cursor: pointer;'>
-  Return</button></a>
-     </div>
-     </center>
-     </body>
-     </center>
-                    """)
-
-# Admin
 
 
-@ app.route("/user")
-def admin():
-    logger.info(Fore.YELLOW + "[ Info ] Admin Dashboard Loaded")
-    return render_template("login_admin.html")
-
-# Login Admin
 
 
-@ app.route("/user", methods=["POST"])
-@ limiter.limit("3 per minutes")
-def admin_login():
-    admin_username = request.form["admin_username"]
-    admin_password = request.form["admin_password"]
-    if admin_username == config.ADMIN_USERNAME and admin_password == config.ADMIN_PASSWORD:
-        logger.info(
-            Fore.YELLOW + "[ Info ] App sleep for Prevent Bruteforce Attack")
-        time.sleep(5)
-        csv_files = number_of_excel_files()
-        map_files = number_of_maps()
-        doc_file = number_of_document_files()
-        rc = number_of_marker_table() + number_of_circular_table()
-        return render_template("form_dash.html", database_record=rc, number_of_maps=map_files, number_of_excel_file=csv_files, number_of_documents=doc_file)
-    else:
-        logger.warning(
-            Fore.RED + "[ Warning ] Username or Password is False,redirected to /admin")
-        return redirect("/user")
 
 
-# CSV to MYSQL
-"""at This Route read csv File and try to save it in MYSQL"""
 
 
-@app.route("/user/read_excel/circular", methods=["POST"])
-def read_excel_cicular():
-    excel_file = request.files["excel_file"]
+
+
+@app.route("/tools/geopands")
+def shapely():
+    return render_template("tools.html")
+
+
+
+
+@app.route('/tools/geopands', methods=['POST'])
+def check_point_in_polygon():
+    result = None
+    if request.method == 'POST':
+        try:
+            # Get user inputs
+            point_input = request.form.get('point')
+            polygon_input = request.form.get('polygon')
+
+            # Convert input strings to appropriate types
+            point_coords = tuple(map(float, point_input.split(',')))
+            polygon_coords = [tuple(map(float, coord.split(','))) for coord in polygon_input.split()]
+
+            # Create Point and Polygon objects
+            point = Point(point_coords)
+            polygon = Polygon(polygon_coords)
+
+            # Check if the point is within the polygon
+            result = point.within(polygon)
+            result = f"The point {point} is within the polygon {polygon}: {result}"
+        except Exception as e:
+            result = f"An error occurred: {e}"
+
+    return render_template("tools.html", result=result)
+
+
+
+
+@app.route("/tools/harvesin")
+def pyproj_get():
+        return render_template("tools.html")
+
+
+
+@app.route("/tools/harvesin" , methods = ["POST"])
+def pyproj():
     try:
-        df = pd.read_csv(excel_file)
-        for index, (Number, Name, Address, Latitude, Longitude) in df.iterrows():
-            db = pymysql.connect(host=config.DB_HOST,
-                                 user=config.DB_USER,
-                                 passwd=config.DB_PASSWORD,
-                                 db=config.DB,
-                                 port=config.DB_PORT,
-                                 charset='utf8',
-                                 use_unicode=True)
-            cur = db.cursor()
-            query = "INSERT INTO map VALUES( %s , %s , %s , %s , %s )"
-            cur.execute(query,
-                        (Number, Name, Address, Latitude, Longitude))
-            db.commit()
-            db.close()
-        return Response(f"""<body style='background-color:white;'>
-						<center>
-						<h2 style='color:red;'>Done</h2>
-						<h1>Excel File Saved Successfuly in Database</h1>
-						<a href='/'><button>Home</button></a>
-						</center>
-						</body>""")
-
-    except:
-        return Response(f"""<body style='background-color:white;'>
-						<center>
-						<h2 style='color:red;'>ERROR</h2>
-                            <h1 style='color:red;'>Error File Saving in Database</h1>
-						<a href='/'><button>Home</button></a>
-						</center>
-						</body>""")
+        lon1 = float(request.form['lon1'])
+        lat1 = float(request.form['lat1'])
+        lon2 = float(request.form['lon2'])
+        lat2 = float(request.form['lat2'])
+        
+        point1 = (lat1, lon1)
+        point2 = (lat2, lon2)
+        
+        distance = haversine(point1, point2, unit=Unit.KILOMETERS)
+        
+        response_data = {
+            'longitude1': lon1,
+            'latitude1': lat1,
+            'longitude2': lon2,
+            'latitude2': lat2,
+            'distance_km': distance
+        }
+        
+        return Response(json.dumps(response_data), mimetype='application/json')
+    
+    except ValueError as e:
+        return Response(json.dumps({'error': str(e)}), mimetype='application/json')
+    
 
 
-@app.route("/user/read_excel/marker", methods=["POST"])
-def read_excel_marker():
-    excel_file = request.files["excel_file"]
+
+
+def generate_heatmap(heat_data):
+    # Create a map centered at a specific location
+    m = folium.Map(location=[39.8283, -98.5795], zoom_start=4)
+
+    # Add heat map layer
+    HeatMap(heat_data).add_to(m)
+
+    # Save the map as a temporary HTML file
+    temp_file = 'heatmap_data.html'
+    m.save(temp_file)
+
+    return temp_file
+
+
+
+
+@app.route("/heatmap")
+def heatmap_get():
+    return render_template("heatmap.html")
+
+
+
+
+@app.route('/heatmap', methods=['POST'])
+def heatmap_post():
+    if request.method == 'POST':
+        heat_data = []
+        try:
+            num_points = int(request.form['num_points'])
+            for i in range(num_points):
+                latitude = float(request.form[f'latitude_{i+1}'])
+                longitude = float(request.form[f'longitude_{i+1}'])
+                intensity = float(request.form[f'intensity_{i+1}'])
+                heat_data.append([latitude, longitude, intensity])
+            
+            # Generate the heatmap
+            heatmap_file = generate_heatmap(heat_data)
+
+            # Return the heatmap file as a response
+            return send_file(heatmap_file, as_attachment=True, attachment_filename='heatmap_data.html')
+
+        except ValueError:
+            return "Invalid input. Please enter numeric values."
+    
+    return render_template('heatmap.html')
+
+
+
+
+
+@app.route("/variogram_kriging")
+def variogram_kriging():
+    return render_template("geostatistics.html" , username = username)
+
+
+
+
+@app.route("/variogram_kriging" , methods=["POST"])
+def geostatistics():
+    # Get the user input from the form
+    x_coords = request.form['X']
+    y_coords = request.form['Y']
+    values = request.form['Value']
+    
+    # Convert the input strings into lists of floats
+    x_coords = list(map(float, x_coords.split(',')))
+    y_coords = list(map(float, y_coords.split(',')))
+    values = list(map(float, values.split(',')))
+
+    # Ensure that the input lists have the same length
+    if not (len(x_coords) == len(y_coords) == len(values)):
+        return "Error: X, Y, and Value lists must be of the same length."
+
+    # Create a DataFrame from the user input
+    data = pd.DataFrame({
+        'X': x_coords,
+        'Y': y_coords,
+        'Value': values
+    })
+
+    # Save the data to a CSV file as Pygeostat works with files
+    data_file = 'data.csv'
+    data.to_csv(data_file, index=False)
+
+    # Load the data into a Pygeostat DataFile object
+    df = gs.DataFile(flname=data_file)
+
+    # Calculate and plot the variogram
+    variogram = gs.Variogram(df, coord_cols=['X', 'Y'], var_cols='Value', log=False)
+
+    # Fit a variogram model
+    variogram_model = variogram.fit_model()
+
+    # Perform ordinary kriging
+    krig_result = gs.Krige(df, variogram_model, coord_cols=['X', 'Y'], var_cols='Value')
+
+    # Save the kriging result to a CSV file
+    krig_result_file = 'krig_result.csv'
+    krig_result.to_csv(krig_result_file, index=False)
+
+    # Send the kriging result file as a downloadable file
+    return send_file(krig_result_file, as_attachment=True)
+
+
+
+@app.route('/process_seismic')
+def seismic():
+    return render_template("geostatistics.html" , username = username)
+
+
+
+
+
+
+@app.route('/process_seismic', methods=['POST'])
+def process_seismic():
+    if 'file' not in request.files:
+        flash('No file part')
+        return redirect(url_for('index'))
+    
+    uploaded_file = request.files['file']
+    if uploaded_file.filename == '':
+        flash('No selected file')
+        return redirect(url_for('index'))
+    
     try:
-        df = pd.read_csv(excel_file)
-        for index, (Number, Name, Address, Latitude, Longitude) in df.iterrows():
-            db = pymysql.connect(host=config.DB_HOST,
-                                 user=config.DB_USER,
-                                 passwd=config.DB_PASSWORD,
-                                 db=config.DB,
-                                 port=config.DB_PORT,
-                                 charset='utf8',
-                                 use_unicode=True)
-            cur = db.cursor()
-            query = "INSERT INTO map VALUES( %s , %s , %s , %s , %s )"
-            cur.execute(query,
-                        (Number, Name, Address, Latitude, Longitude))
-            db.commit()
-            db.close()
-            return Response(f"""<body style='background-color:white;'>
-						<center>
-						<h2 style='color:red;'>Done</h2>
-						<h1>Excel File Saved Successfuly in Database</h1>
-						<a href='/'><button>Home</button></a>
-						</center>
-						</body>""")
+        file_path = os.path.join(upload_path, uploaded_file.filename)
+        uploaded_file.save(file_path)
 
-    except:
-        return Response(f"""<body style='background-color:white;'>
-						<center>
-						<h2 style='color:red;'>ERROR</h2>
-                            <h1 style='color:red;'>Error File Saving in Database</h1>
-						<a href='/'><button>Home</button></a>
-						</center>
-						</body>""")
+        # Read the seismic data file using ObsPy
+        st = read(file_path)
+        
+        # Select the first trace in the stream
+        tr = st[0]
+        
+        # Filter the data (e.g., bandpass filter between 0.1 and 10 Hz)
+        tr.filter("bandpass", freqmin=0.1, freqmax=10.0)
+        
+        # Plot the filtered data
+        plot_path = os.path.join(upload_path, 'filtered_seismic_data.png')
+        tr.plot(outfile=plot_path)
+
+        return send_file(plot_path, as_attachment=True)
+    except Exception as e:
+        flash(f'Error processing file: {str(e)}')
+        return redirect(url_for('index'))
 
 
-@ app.route("/user/db/search", methods=["POST"])
+
+
+@app.route('/location_prediction')
+def predict_loc():
+    return render_template("predict_location.html" , username = username)
+
+
+
+# Load location data from CSV
+def load_location_data():
+    return pd.read_csv('location_data.csv')
+
+# Define function for linear interpolation
+def interpolate_timestamp(loc, loc1, loc2, t1, t2):
+    """
+    Perform linear interpolation to predict timestamp at given latitude or longitude between two known locations.
+    
+    Parameters:
+    - loc: Target latitude or longitude for prediction
+    - loc1, loc2: Coordinates (latitude, longitude) of known locations
+    - t1, t2: Timestamps of known locations (t1 < t < t2)
+    
+    Returns:
+    - Predicted timestamp at given latitude or longitude
+    """
+    delta_loc = (loc - loc1) / (loc2 - loc1)
+    interpolated_time = t1 + delta_loc * (t2 - t1)
+    return interpolated_time
+
+
+@app.route('/location_prediction', methods=['POST'])
+def predict_locations():
+    location_data = load_location_data()
+
+    # Read latitude and longitude from form input
+    input_latitude = float(request.form['latitude'])
+    input_longitude = float(request.form['longitude'])
+
+    # Find closest locations
+    for i in range(len(location_data) - 1):
+        loc1 = location_data[['latitude', 'longitude']].iloc[i]
+        loc2 = location_data[['latitude', 'longitude']].iloc[i + 1]
+        
+        if loc1['latitude'] <= input_latitude <= loc2['latitude'] or loc1['longitude'] <= input_longitude <= loc2['longitude']:
+            t1 = datetime.strptime(location_data['timestamp'].iloc[i], '%Y-%m-%d %H:%M:%S')
+            t2 = datetime.strptime(location_data['timestamp'].iloc[i + 1], '%Y-%m-%d %H:%M:%S')
+            
+            # Interpolate timestamp
+            interpolated_time = interpolate_timestamp(input_latitude, loc1['latitude'], loc2['latitude'], t1, t2)
+
+            # Prepare HTML response
+            html_response = f"""
+            <html>
+            <head><title>Predicted Location</title></head>
+            <body>
+                <h1>Predicted Location</h1>
+                <p>Latitude: {input_latitude}</p>
+                <p>Longitude: {input_longitude}</p>
+                <p>Predicted Timestamp: {interpolated_time.strftime('%Y-%m-%d %H:%M:%S')}</p>
+            </body>
+            </html>
+            """
+            
+            # Create HTML response with Response object
+            response = make_response(html_response)
+            response.headers['Content-Type'] = 'text/html'
+            return response
+    
+    # Return error response if prediction fails
+    return make_response("<html><body><h1>Prediction Error</h1></body></html>", 400)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@ app.route("/search", methods=["POST"])
 def Search_db():
     jostoju = request.form["search"]
     logger.info(Fore.YELLOW + "[ Info ] user Start to Search ans asnad")
@@ -814,169 +862,19 @@ def remove_db():
         return render_template("404.html")
 
 
-@ app.route("/user/db/backup", methods=["POST"])
-def db_backup():
-    try:
-        logger.info(
-            Fore.YELLOW + " [ INFO ] => Connected To MariaDB to Get Backup")
-        db = pymysql.connect(host=config.DB_HOST,
-                             user=config.DB_USER,
-                             passwd=config.DB_PASSWORD,
-                             db=config.DB,
-                             port=config.DB_PORT,
-                             charset='utf8',
-                             use_unicode=True)
-        mydb = config.DB
-        cur = db.cursor()
-        cur.execute('SHOW TABLES;')
-        table_names = []
-        for record in cur.fetchall():
-            table_names.append(record[0])
-        backup_dbname = mydb + '_backup'
-        try:
-            cur.execute(f'CREATE DATABASE {backup_dbname}')
-        except:
-            pass
-        for table_name in table_names:
-            cur.execute(
-                f'CREATE TABLE {table_name} SELECT * FROM {mydb}.{table_name}')
-        return Response(f"""<html><body style='background-color:#A9A9A9;'>
-                        <center>
-                        <h3>Your backups have been created.</h3>
-                       <img src='./static/Mariadb.png' alt='Github' width="900" height="300">
-                        </center>
-                        </body></html>""")
-
-    except:
-        return Response(f"""<html><body style='background-color:white;'>
-                        <center>
-                        <h3> Mariadb Backup</h3>
-                        <h2 style='color:red;'>ERROR on connectiong TO MariaDB </h2>
-                        </center>
-                        </body></html>""")
 
 
-@ app.route("/user/db/export2excel", methods=["POST"])
-def export_excel():
-    try:
-        user = config.DB_USER  # your username
-        passwd = config.DB_PASSWORD  # your password
-        host = config.DB_HOST  # your host
-        port = config.DB_PORT  # mysql port
-        db = config.DB  # database where your table is stored
-        table = 'map'  # table you want to save
-        logger.critical(
-            Fore.RED + "[ Warning ] admin Try to Dump Excel of Mapper Table in Excel")
-        con = pymysql.connect(user=user, passwd=passwd,
-                              host=host, db=db, port=port)
-        cursor = con.cursor()
-        query = "SELECT * FROM %s;" % table
-        cursor.execute(query)
-        with open(f'{db_backup_path}/map.csv', 'w') as f:
-            writer = csv.writer(f)
-            for row in cursor.fetchall():
-                writer.writerow(row)
-            return Response(f"""<html><body style='background-color:#8FBC8F;'>
-                        <center>
-                        <h2 style='color:#2F4F4F;'>Successfully Export</h2>
-                       <img src='./static/excel.jpg' alt='Github' width="1000" height="500">
-                        </center>
-                        </body></html>""")
-    except:
-        return render_template("404.html")
 
 
-@ app.route("/user/read_excel/circular", methods=["POST"])
-def read_excel_circular():
-    excel_file = request.files["excel_file"]
-    try:
-        df = pd.read_csv(excel_file)
-        for index, (Number, Name, Address, Latitude, Longitude) in df.iterrows():
-            db = pymysql.connect(host=config.DB_HOST,
-                                 user=config.DB_USER,
-                                 passwd=config.DB_PASSWORD,
-                                 db=config.DB,
-                                 port=config.DB_PORT,
-                                 charset='utf8',
-                                 use_unicode=True)
-            cur = db.cursor()
-            query = "INSERT INTO map_circular VALUES( %s , %s , %s , %s , %s )"
-            cur.execute(query,
-                        (Number, Name, Address, Latitude, Longitude))
-            db.commit()
-            db.close()
-        return Response(f"""<html><body style='background-color:#8FBC8F;'>
-                        <center>
-                        <h2 style='color:#2F4F4F;'>Successfully Export</h2>
-                       <img src='./static/excel.jpg' alt='excel' width="600" height="400">
-                       <img src='./static/Mariadb.png' alt='mariadb' width="600" height="400">
-                        </center>
-                        </body></html>""")
-
-    except:
-        return Response(f"""<html><body style='background-color:#FFF0F5;'>
-                        <center>
-                        <h1 style='color:red;'> Export ERROR !!! </h1>
-                       <img src='./static/excel.jpg' alt='excel' width="600" height="400">
-                       <img src='./static/Mariadb.png' alt='mariadb' width="600" height="400">
-                        </center>
-                        </body></html>""")
 
 
-@ app.route("/user/read_excel/marker", methods=["POST"])
-def read_excel_markerr():
-    excel_file = request.files["excel_file"]
-    try:
-        df = pd.read_csv(excel_file)
-        for index, (Number, Name, Address, Latitude, Longitude) in df.iterrows():
-            db = pymysql.connect(host=config.DB_HOST,
-                                 user=config.DB_USER,
-                                 passwd=config.DB_PASSWORD,
-                                 db=config.DB,
-                                 port=config.DB_PORT,
-                                 charset='utf8',
-                                 use_unicode=True)
-            cur = db.cursor()
-            query = "INSERT INTO map_marker VALUES( %s , %s , %s , %s , %s )"
-            cur.execute(query,
-                        (Number, Name, Address, Latitude, Longitude))
-            db.commit()
-            db.close()
-        return Response(f"""<html><body style='background-color:#8FBC8F;'>
-                        <center>
-                        <h2 style='color:#2F4F4F;'>Successfully Export</h2>
-                       <img src='./static/excel.jpg' alt='excel' width="600" height="400">
-                       <img src='./static/Mariadb.png' alt='mariadb' width="600" height="400">
-                        </center>
-                        </body></html>""")
-
-    except:
-        return Response(f"""<html><body style='background-color:#FFF0F5;'>
-                        <center>
-                        <h1 style='color:red;'> Export ERROR !!! </h1>
-                       <img src='./static/excel.jpg' alt='excel' width="600" height="400">
-                       <img src='./static/Mariadb.png' alt='mariadb' width="600" height="400">
-                        </center>
-                        </body></html>""")
 
 
-# logs
-@ app.route("/user/logs")
-def logs():
-    with open("KYGnus_Map.log", "r") as log_file:
-        log_read = log_file.readlines()
-        # logger.info(Fore.YELLOW + "[ Info ] Loading Log File")
-        return render_template("log.html", log_line=log_read)
 
 
-# Document
-""" Create Minimal Documents For app in Html Style """
 
 
-@ app.route("/documentation")
-def document():
-    logger.info(Fore.YELLOW + "[ Info ] user Start to View Documentation")
-    return render_template("Documentation.html")
+
 
 
 # TODO : create log template
@@ -985,42 +883,123 @@ def document():
 @ app.route("/analyzer")
 def analyzer():
     logger.info(Fore.YELLOW + "[ Info ]  Analyzer template Loaded")
-    return render_template("analyzer.html")
+    return render_template("analyzer.html" , username = username)
 
 # Document Analyzer
 
 # TODO : check Document File Type and Format and Extensions and Interior of File for Unwanted Data
 
 
-@ app.route("/analyzer/files", methods=["POST"])
+def extract_map_info(file_path):
+    map_info = []
+
+    with open(file_path, 'r') as file:
+        for line in file:
+            # Assuming latitude and longitude are in the format "Lat: xx.xx, Lon: xx.xx"
+            match = re.search(r'Lat: ([\d.-]+), Lon: ([\d.-]+)', line)
+            if match:
+                lat = float(match.group(1))
+                lon = float(match.group(2))
+                map_info.append({'latitude': lat, 'longitude': lon})
+    
+    return map_info
+
+
+
+def extract_map_info_from_csv(file_path):
+    map_info = []
+
+    with open(file_path, 'r', newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            lat = float(row['latitude'])
+            lon = float(row['longitude'])
+            map_info.append({'latitude': lat, 'longitude': lon})
+
+    return map_info
+
+
+
+@ app.route("/analyzer/text", methods=["POST"])
 def post_document_analyzer():
-   # logger.info(Fore.YELLOW + "[ Info ]  User start to Analyze Document")
-    path = request.form["docfile"]
-    files = glob.glob(f"{path}/**/*.txt", recursive=True)
-    for file in files:
-        with open(file, "r") as readfile:
-            result = readfile.read()
-            if re.search("encrypt", result) or re.search("decrypt", result) or re.search("crypt", result) or re.search("hacked", result):
-                # logger.critical(Fore.RED + "Malicious File Detected [ERROR]")
-                with open(f"/opt/KYGnus_Map/Analyze_results.txt", "w") as af:
-                    af.write("Malicious File Detected [ERROR]")
-                    af.close()
-            else:
-                with open(f"/opt/KYGnus_Map/Analyze_results.txt", "w") as af:
-                    af.write("File check [ OK ]")
-                    af.close()
-                # logger.info(Fore.CYAN + "File check [ OK ]")
-    return Response(f"<body style='background-color:white;'><center><h2 style='color:red;''> File Checked </h2><h1> Results saved in app Directory </h1><h3> app Directory is {appdir}</h3></center></body>")
+    file = request.files['textfile']
+    if file.filename == '':
+        return "Empty file", 400
+
+    # Check if the file is a text file
+    if file and file.filename.endswith('.txt'):
+        # Save the file to a temporary location
+        file_path = os.path.join('uploads', file.filename)
+        file.save(file_path)
+
+        # Extract map information from the file
+        map_info = extract_map_info(file_path)
+
+        # Delete the temporary file
+        os.remove(file_path)
+
+        # Create a temporary file to store the map information
+        with NamedTemporaryFile(mode='w', delete=False) as temp_file:
+            # Write the map information to the temporary file
+            json.dump(map_info, temp_file)
+
+        # Return the temporary file as a response
+        return send_file(temp_file.name, as_attachment=True, attachment_filename='map_info.json', mimetype='application/json')
+    
+    else:
+        return "Invalid file format, please upload a text file (.txt)", 400
 
 
-# maps
-@ app.route("/maps")
-def maps():
-    logger.info("system File Manager is Loaded in maps Directory")
-    maps = os.popen(
-        f"xdg-open /opt/KYgnus_Map/templates/maps").read()
-    return maps
+
+@ app.route("/analyzer/csv", methods=["POST"])
+def post_csv_analyzer():
+    file = request.files['csvfile']
+
+    # Check if the file is empty
+    if file.filename == '':
+        return "Empty file", 400
+
+    # Check if the file is a CSV file
+    if file and file.filename.endswith('.csv'):
+        # Save the file to a temporary location
+        file_path = os.path.join('uploads', file.filename)
+        file.save(file_path)
+
+        # Extract map information from the CSV file
+        map_info = extract_map_info_from_csv(file_path)
+
+        # Delete the temporary file
+        os.remove(file_path)
+
+        # Create a temporary file to store the map information in CSV format
+        with NamedTemporaryFile(mode='w', delete=False, newline='') as temp_file:
+            # Create a CSV writer object
+            csv_writer = csv.DictWriter(temp_file, fieldnames=['latitude', 'longitude'])
+            csv_writer.writeheader()
+            # Write the map information to the temporary file
+            csv_writer.writerows(map_info)
+
+        # Return the temporary file as a response
+        return send_file(temp_file.name, as_attachment=True, attachment_filename='extracted_map_info.csv', mimetype='text/csv')
+    
+    else:
+        return "Invalid file format, please upload a CSV file (.csv)", 400
+
+@app.route("/home")
+def home():
+    return render_template('index.html', 
+                           number_of_files=number_of_files(),
+                           number_of_excel_files=number_of_excel_files(),
+                           number_of_maps=number_of_maps(),
+                           number_of_modules=number_of_modules() , username = username)
+
+
+
+
+@app.route("/document")
+def document():
+    return render_template("Documentation.html")
 
 
 if __name__ == "__main__":
-    app.run(port=8080)
+    app.run (port=5005 , debug=True)

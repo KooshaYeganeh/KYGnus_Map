@@ -21,21 +21,11 @@ Easly Create Map and Some Other Features
 
 ## basic Requirements
 
-1- Linux : I Test App in **Fedora35** and **Ubuntu22.04** <br />
 2- MariaDB <br />
-**Fedora:**  
-`sudo dnf install mariadb-server`  
-**Ubuntu:**  
-`sudo apt install mariadb-server`  
 **OpenSuse:**  
 `sudo zypper install mariadb-server`<br /><br />
 3- Python & pip <br />  
-**Fedora:**  
-`sudo dnf install python-pip`  
-**Ubuntu:**  
-`sudo apt install python3-pip`  
-**OpenSuse:**  
-`sudo zypper install python3-pip`
+`sudo zypper install python311`
 
 
 
@@ -57,28 +47,13 @@ cd /tmp && wget https://github.com/KooshaYeganeh/KYGnus_Map/archive/refs/heads/m
 ```
 
 ```
-sudo mv /tmp/KYGnus_Map /opt && cd /opt/KYGnus_Map && echo -e "\n The software directory was placed in the correct path [ OK ]"
+sudo mv /tmp/KYGnus_Map /home/$USER/kygnus_map && cd /home/$USER/kygnus_map && echo -e "\n The software directory was placed in the correct path [ OK ]"
 ```
 
 
 **2-Test the pip Package Manager and then Install the packages**
 
 First First, we check that the pip is installed correctly on the system, then Install packages
-
-*pip -V*
-
-Fedora: 
-
-```
-sudo pip install -r requirements.txt
-```
-
-Ubuntu: 
-
-```
-sudo pip3 install -r requirements.txt
-```
-openSUSE Leap : 
 
 ```
 sudo pip install -r requirements.txt
@@ -145,28 +120,11 @@ cd /etc/systemd/system/ && sudo systemctl enable KYGnus_Map.service && sudo syst
 
 
 
-
-**9- Create Directory For standard Logs /var/log**
-*Note: change user(koosha) with Your user in all lines*
- - 9-1 : Go to /var/log Directory and make Directory for app
-
-```
-cd /var/log && sudo mkdir KYGnus_Map && sudo ln -s /opt/KYGnus_Map/Log KYGnus_Map && cd && echo "Standard Log File Created Successfully [ OK ]"
-```
-
-**10- Create Directory For standard Settings /etc**
-*Note: change user(koosha) with Your user in all lines*
- - 10-1 : Go to /etc Directory and make Directory for app
-
-```
-cd /etc && sudo mkdir KYGnus_Map && cd KYGnus_Map && sudo ln -s  /opt/KYGnus_Map/config.py KYGnus_Map.conf && cd && echo "Standard config File Created Successfully [ OK ]"
-```
-
-
 **11- for Better Security You should Block 8080 port in Your system**
 
 ```
-sudo iptables -t filter -A INPUT -p tcp -i any --dport 8080 -j DROP
+sudo firewall-cmd --permanent --zone=public --add-port=80/tcp
+sudo firewall-cmd --reload
 ```
 
 
@@ -174,7 +132,7 @@ sudo iptables -t filter -A INPUT -p tcp -i any --dport 8080 -j DROP
 ## Remove
 
 ```
-sudo iptables -F && sudo rm /etc/systemd/system/KYGnus_Map.service && sudo rm -rf /var/log/KYGnus-Map && sudo rm -rf /etc/KYGnus-Map  && rm -rf /opt/KYGnus-Map && mysql --execute="DROP DATABASE mapper;" && echo "KYGnus-Map Removed [ Successfully ]"
+rm -rvf /home/$USER/kygnus_map && mariadb --execute="DROP DATABASE mapper" && sudo rm /etc/systemd/system/KYGnus_Map.service
 ```
 
 

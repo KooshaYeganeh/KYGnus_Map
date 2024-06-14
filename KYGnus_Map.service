@@ -4,9 +4,9 @@ After=NetworkManager.service mariadb.service
 
 [Service]
 Type=simple
-ExecStart=/bin/bash /opt/KYGnus_Map.sh
-ExecStop=/bin/bash /opt/KYGnus_Map.sh --Kill
-ExecReload=/bin/bash /opt/KYGnus_Map.sh --HUP
+ExecStart=/bin/bash /home/koosha/kygnus_map/KYGnus_Map
+ExecStop=/bin/bash /home/koosha/kygnus_map/KYGnus_Map --Kill
+ExecReload=/bin/bash /home/koosha/kygnus_map/KYGnus_Map --HUP
 
 
 [Install]

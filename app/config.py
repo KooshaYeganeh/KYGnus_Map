@@ -21,4 +21,4 @@ DB = "mapper"
 # In this section, enter the port number on which mariadb is running.
 # or security reasons, it is better to change the mariadb port number 
 # from the default 3306. You can do this from your mariadb settings.
-DB_PORT = 3306
+DB_PORT = 3360
