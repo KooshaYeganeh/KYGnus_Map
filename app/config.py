@@ -22,3 +22,4 @@ DB = "mapper"
 # or security reasons, it is better to change the mariadb port number 
 # from the default 3306. You can do this from your mariadb settings.
 DB_PORT = 3360
+SECRET_KEY = "KYGnus_Map_Software"
