@@ -19,6 +19,9 @@
 
 	<link href="../static/css/app.css" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+
 </head>
 
 <body style="background-color:#F8F8FF;">
@@ -36,28 +39,67 @@
 							<p style="color: #2F4F4F;">Note : Update Database with your Locations</p>
 						</div>
 
-						<div class="card">
-							<div class="card-body">
-								<div class="m-sm-4">
-									<form action="/location_prediction" method="post">
-										<div class="mb-3">
-											<label class="form-label">Latitude</label>
-											<input class="form-control form-control-lg" type="text" name="latitude"
-												placeholder="Enter your Latitude" />
-										</div>
-										<div class="mb-3">
-											<label class="form-label">Longitude</label>
-											<input class="form-control form-control-lg" type="text" name="longitude"
-												placeholder="Enter your Longitude" />
-										</div>
-										<div class="text-center mt-3">
 
-											<button type="submit" class="btn btn-lg btn-primary">START</button>
-										</div>
-									</form>
+
+								
+						<form action="/location_prediction" method="post">
+							
+								
+								<div class="mb-3">
+									<label for="timestamp">Timestamp:</label>
+									
+									<input class="form-control form-control-lg" type="text" name="timestamp" placeholder="2023-01-01 12:00:00" />
+								</div> 
+								
+
+								<div class="mb-3">
+									<label for="latitude">Latitude:</label>
+									<input class="form-control form-control-lg" type="text" name="latitude" placeholder="40.7128" />
 								</div>
+								
+
+
+								<div class="mb-3">
+									<label for="longitude">Longitude:</label>
+									<input class="form-control form-control-lg" type="text" name="longitude" placeholder="-74.0060" />
+								</div>
+								
+						
+
+								<button type="submit" class="btn btn-primary btn-lg btn-block">Start Predict</button>
+
+
+						</form> <br><br>
+								
+							
+								
+								
+							<div class="row">
+
+								<div class="card">
+									
+									<div class="card-body">
+										{% if predicted_latitude is not none and predicted_longitude is not none %}
+										<h3>Predicted Next Position</h3>
+										<p>Latitude: {{ predicted_latitude }}</p>
+										<p>Longitude: {{ predicted_longitude }}</p>
+										{% endif %}
+									</div>
+								</div>
+
 							</div>
-						</div>
+								
+
+
+								
+
+								
+								
+
+
+							
+							
+
 
 					</div>
 				</div>
@@ -66,6 +108,34 @@
 	</main>
 
 	<script src="../static/js/app.js"></script>
+    <script>
+        document.getElementById('positionForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const data = {
+                timestamp: document.getElementById('timestamp').value,
+                latitude: parseFloat(document.getElementById('latitude').value),
+                longitude: parseFloat(document.getElementById('longitude').value)
+            };
+
+            fetch('/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                alert(`Predicted Next Position: Latitude ${data.predicted_latitude}, Longitude ${data.predicted_longitude}`);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+
 
 </body>
 

@@ -168,54 +168,49 @@
 							</div>
 
 
+							<form action="/heatmap" method="post">
+								<div class="mb-3">
+									<label class="form-label">Number of Points:</label>
+									<input class="form-control form-control-lg" type="number" name="num_points" value="2" min="1" max="100" id="num_points" />
+								</div>
 
-
-							<div class="card" style="background-color: #F0F8FF;">
-								<div class="card-body">
-									<div class="m-sm-4">
-										<form action="/location_prediction" method="post">
-											<div class="mb-3">
-												<label class="form-label">Latitude 1:</label>
-												<input class="form-control form-control-lg" type="text" name="latitude_1"
-													placeholder="Enter your Latitude" />
-											</div>
-											<div class="mb-3">
-												<label class="form-label">Longitude 1:</label>
-												<input class="form-control form-control-lg" type="text" name="longitude_1"
-													placeholder="Enter your Longitude" />
-											</div>
-
-											<div class="mb-3">
-												<label class="form-label">Intensity 1:</label>
-												<input class="form-control form-control-lg" type="text" name="intensity_1"
-													placeholder="Enter your Intensity" />
-											</div>
-											<div class="mb-3">
-												<label class="form-label">Latitude 2:</label>
-												<input class="form-control form-control-lg" type="text" name="latitude_2"
-													placeholder="Enter your Longitude" />
-											</div>
-											<div class="mb-3">
-												<label class="form-label">Longitude 2:</label>
-												<input class="form-control form-control-lg" type="text" name="longitude_2"
-													placeholder="Enter your Longitude" />
-											</div>
-											<div class="mb-3">
-												<label class="form-label">Intensity 2:</label>
-												<input class="form-control form-control-lg" type="text" name="intensity_2"
-													placeholder="Enter your Intensity" />
-											</div>
-											<div class="text-center mt-3">
-	
-												<button type="submit" class="btn btn-lg btn-primary">START</button>
-											</div>
-										</form>
+							<div id="points-container">
+								<div class="point" id="point_1">
+									<div class="mb-3">
+										<label class="form-label">Latitude 1:</label>
+										<input class="form-control form-control-lg" type="text" name="latitude_1" placeholder="Enter your Latitude" />
+									</div>
+									<div class="mb-3">
+										<label class="form-label">Longitude 1:</label>
+										<input class="form-control form-control-lg" type="text" name="longitude_1" placeholder="Enter your Longitude" />
+									</div>
+									<div class="mb-3">
+										<label class="form-label">Intensity 1:</label>
+										<input class="form-control form-control-lg" type="text" name="intensity_1" placeholder="Enter your Intensity" />
+									</div>
+								</div>
+								<div class="point" id="point_2">
+									<div class="mb-3">
+										<label class="form-label">Latitude 2:</label>
+										<input class="form-control form-control-lg" type="text" name="latitude_2" placeholder="Enter your Latitude" />
+									</div>
+									<div class="mb-3">
+										<label class="form-label">Longitude 2:</label>
+										<input class="form-control form-control-lg" type="text" name="longitude_2" placeholder="Enter your Longitude" />
+									</div>
+									<div class="mb-3">
+										<label class="form-label">Intensity 2:</label>
+										<input class="form-control form-control-lg" type="text" name="intensity_2" placeholder="Enter your Intensity" />
 									</div>
 								</div>
 							</div>
+							<div class="text-center mt-3">
+								<button type="submit" class="btn btn-lg btn-primary">START</button>
+							</div>
+
 							</form>
 						</div>
-						</form>
+						
 					</div>
 				</main>
 
@@ -246,6 +241,34 @@
 		</div>
 
 		<script src="../static/js/app.js"></script>
+		<script>
+			document.getElementById('num_points').addEventListener('input', function() {
+				const numPoints = this.value;
+				const container = document.getElementById('points-container');
+				container.innerHTML = '';
+	
+				for (let i = 1; i <= numPoints; i++) {
+					const pointDiv = document.createElement('div');
+					pointDiv.className = 'point';
+					pointDiv.id = `point_${i}`;
+					pointDiv.innerHTML = `
+						<div class="mb-3">
+							<label class="form-label">Latitude ${i}:</label>
+							<input class="form-control form-control-lg" type="text" name="latitude_${i}" placeholder="Enter your Latitude" />
+						</div>
+						<div class="mb-3">
+							<label class="form-label">Longitude ${i}:</label>
+							<input class="form-control form-control-lg" type="text" name="longitude_${i}" placeholder="Enter your Longitude" />
+						</div>
+						<div class="mb-3">
+							<label class="form-label">Intensity ${i}:</label>
+							<input class="form-control form-control-lg" type="text" name="intensity_${i}" placeholder="Enter your Intensity" />
+						</div>
+					`;
+					container.appendChild(pointDiv);
+				}
+			});
+		</script>
 
 </body>
 

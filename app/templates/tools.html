@@ -166,6 +166,18 @@
 											<h5 class="card-title mb-0">Geopy</h5><br>
 											<p>geopy makes it easy for Python developers to locate the coordinates of addresses, cities, countries, and landmarks across the globe using third-party geocoders and other data sources.</p>
 										</div>
+										<div class="card-header">
+											<h5 class="card-title mb-0" style="color: chocolate;">Geopy Result</h5><br>
+												{% if coordinates %}
+												<h2 class="mt-5">Coordinates:</h2>
+												<p>Latitude: {{ coordinates[0] }}</p>
+												<p>Longitude: {{ coordinates[1] }}</p>
+													{% endif %}
+													{% if error_message %}
+														<div class="alert alert-danger mt-3">{{ error_message }}</div>
+													{% endif %}
+
+										</div>
 										<div class="card-body">
 											<input type="text" name="address" class="form-control"
 												id="customFile" placeholder="address" /><br>
@@ -197,15 +209,19 @@
 												<input type="text" name="alpha" class="form-control"
 												id="customFile" placeholder="alpha" /><br>
 											<button type="submit" class="btn btn-primary">Submit</button>
+
+										</div>
+										<div class="card-header">
+											{% if plot_url %}
+											<h2>Generated Plot:</h2>
+											<img src="{{ plot_url }}" alt="Generated Plot" class="img-fluid">
+										{% endif %}
 										</div>
 									</div>
 								</form>
 
 
-								{% if plot_url %}
-								<h2>Generated Plot:</h2>
-								<img src="{{ plot_url }}" alt="GeoPandas Plot">
-								{% endif %}
+
 							</div>
 						</div>
 
@@ -226,6 +242,13 @@
 												id="customFile" placeholder="e.g., 0,0 1,1 1,0"/><br>
 												<button type="submit" class="btn btn-primary btn-lg btn-block">Submit</button>
 										</div>
+
+
+										<div class="card-body">
+											<p>Point: {{ point }}</p>
+											<p>Polygon: {{ polygon }}</p>
+											<p>Contains Point: {{ result }}</p>
+										</div>
 									</div>
 								</form>
 							</div>
@@ -236,7 +259,7 @@
 						<div class="row">
 							
 							<div class="col-12 col-md-12">
-								<form action="/tools/harvesin" method="post" enctype="multipart/form-data">
+								<form action="/tools/haversine" method="post" enctype="multipart/form-data">
 									<div class="card">
 										<div class="card-header">
 											<h5 class="card-title mb-0">Haversine</h5>
@@ -248,8 +271,18 @@
 											<input type="text" name="lat2" class="form-control" placeholder="Latitude 2" required/><br>
 											<button type="submit" class="btn btn-primary">Submit</button>
 										</div>
+										<div class="card-body">
+											<h4>Result : </h4> <br>
+											<p>Longitude 1: {{ lon1 }}</p>
+											<p>Latitude 1: {{ lat1 }}</p>
+											<p>Longitude 2: {{ lon2 }}</p>
+											<p>Latitude 2: {{ lat2 }}</p>
+											<p>Distance (km): {{ distance }}</p>
+											
+										</div>
 									</div>
 								</form>
+
 							</div>
 
 
@@ -285,6 +318,9 @@
 		</div>
 
 		<script src="../static/js/app.js"></script>
+		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
 </body>
 
