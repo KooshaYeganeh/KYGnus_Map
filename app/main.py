@@ -37,7 +37,6 @@ import geopandas as gpd
 from werkzeug.utils import secure_filename
 import os
 from pyproj import Proj, transform
-from shapely.geometry import Point, Polygon
 from haversine import haversine, Unit
 from tempfile import NamedTemporaryFile
 import json
@@ -49,19 +48,27 @@ from sklearn.metrics import mean_squared_error
 from datetime import datetime, timedelta
 import io
 import base64
+import tempfile
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderServiceError
+from shapely.geometry import Point, Polygon
+import requests
+import datetime
+from sklearn.linear_model import LinearRegression
 
 
-
-
-
-
-
+plt.switch_backend('Agg')
 
 
 app = Flask(__name__)
 
 username = getpass.getuser()  # Get username of system
 
+
+mytime = datetime.datetime.now()
+hour = mytime.hour
+minute = mytime.minute
+localtime = f"{hour}:{minute}"
 
 
 appdir = os.path.join(f"/home/{username}/Apps/KYGnus_Map")
@@ -102,12 +109,6 @@ logger.info(Fore.GREEN + """
 
 
 
-
-
-# Create Directory For App
-appdir = os.path.join(f"/home/{username}/Apps/KYGnus_Map")
-os.makedirs(appdir, exist_ok=True)
-logger.info(Fore.YELLOW + "[ INFO ] App Create Directory in Home of username")
 
 
 # Create Directory For Filed in App Directory
@@ -174,21 +175,6 @@ def number_of_excel_files():
     files = glob.glob(f"{excel_files_path}/**/*.csv", recursive=True)
     return len(files)
 
-def number_of_maps():
-    maps_path = "./templates/maps"
-    if not os.path.exists(maps_path):
-        print(f"The directory {maps_path} does not exist.")
-        return 0
-    maps = glob.glob(os.path.join(maps_path, "**/*.html"), recursive=True)
-    return len(maps)
-
-def number_of_modules():
-    modules_path = os.path.abspath("../Modules")
-    if not os.path.exists(modules_path):
-        print(f"The directory {modules_path} does not exist.")
-        return 0
-    modules = glob.glob(os.path.join(modules_path, "**/*.*"), recursive=True)
-    return len(modules)
 
 
 
@@ -214,7 +200,7 @@ limiter = Limiter(
 )
 
 app.config.update(
-    SECRET_KEY="KYGnus_Mapper"
+    SECRET_KEY=config.SECRET_KEY
 )
 
 # Flask-login
@@ -244,13 +230,38 @@ def load_user(userid):
 @app.route("/")
 @login_required
 def index():
+    locations = [
+        {"name": "New York", "lat": 40.7128, "lon": -74.0060},
+        {"name": "London", "lat": 51.5074, "lon": -0.1278},
+        {"name": "Paris", "lat": 48.8566, "lon": 2.3522},
+        {"name": "Tokyo", "lat": 35.6895, "lon": 139.6917},
+        {"name": "Sydney", "lat": -33.8688, "lon": 151.2093},
+        {"name": "Dubai", "lat": 25.2048, "lon": 55.2708},
+        {"name": "Rome", "lat": 41.9028, "lon": 12.4964},
+        {"name": "Hong Kong", "lat": 22.3193, "lon": 114.1694},
+        {"name": "Berlin", "lat": 52.5200, "lon": 13.4050},
+        {"name": "Istanbul", "lat": 41.0082, "lon": 28.9784},
+    ]
+    # Create a Folium map centered on the first location
+    center_lat, center_lon = locations[0]["lat"], locations[0]["lon"]
+    map = folium.Map(location=[center_lat, center_lon], zoom_start=2)
+
+    # Add markers for each location
+    for loc in locations:
+        name = loc["name"]
+        lat, lon = loc["lat"], loc["lon"]
+        folium.Marker([lat, lon], popup=name).add_to(map)
+
+    # Save the map as an HTML string
+    map_html = map._repr_html_()
     return render_template(
         "index.html",
         username=current_user.id,
         number_of_files=number_of_files(),
-        number_of_excel_files=number_of_excel_files(),
-        number_of_maps=number_of_maps(),
-        number_of_modules=number_of_modules()
+        number_of_excel_files=number_of_excel_files() , 
+        map_html=map_html ,
+        localtime = localtime
+
     )
 
 @app.route("/login")
@@ -392,79 +403,30 @@ def cmarker():
 @app.route("/tools")
 def addresses_into_coordinates_get():
     return render_template("tools.html", Number_of_Files=number_of_files(),
-                               number_of_modules=number_of_modules(),
                                number_of_excel_file=number_of_excel_files(), username = username)
 
 
 
-@app.route("/tools/addresses_into_coordinates" , methods=["POST"])
+@app.route("/tools/addresses_into_coordinates", methods=["GET", "POST"])
 def addresses_into_coordinates():
     coordinates = None
+    error_message = None
+    
     if request.method == 'POST':
         address = request.form['address']
-        geolocator = Nominatim(user_agent="geoapiExercises")
-        location = geolocator.geocode(address)
-        if location:
-            coordinates = (location.latitude, location.longitude)
+        geolocator = Nominatim(user_agent="your_unique_app_name")
+        
+        try:
+            location = geolocator.geocode(address)
+            if location:
+                coordinates = (location.latitude, location.longitude)
+            else:
+                error_message = "Could not geocode the provided address."
+        except GeocoderServiceError as e:
+            error_message = str(e)
     
-    return Response('''
-        <!doctype html>
-        <html lang="en">
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-            <title>Geocode Address</title>
-          </head>
-          <body>
-            <div class="container">
-              <h1 class="mt-5">Geocode Address</h1>
-              <form method="post">
-                <div class="form-group">
-                  <label for="address">Enter an address:</label>
-                  <input type="text" class="form-control" id="address" name="address" placeholder="Enter address">
-                </div>
-                <button type="submit" class="btn btn-primary">Geocode</button>
-              </form>
-              {% if coordinates %}
-                <h2 class="mt-5">Coordinates:</h2>
-                <p>Latitude: {{ coordinates[0] }}</p>
-                <p>Longitude: {{ coordinates[1] }}</p>
-              {% endif %}
-            </div>
-          </body>
-        </html>
-    ''', coordinates=coordinates)
+    return render_template("tools.html", coordinates=coordinates, error_message=error_message)
 
-
-
-html_template = '''
-<!DOCTYPE html>
-<html>
-<head>
-    <title>GeoPandas Plot</title>
-</head>
-<body>
-    <h1>Customize GeoPandas Plot</h1>
-    <form action="/" method="post">
-        <label for="country">Country (optional):</label><br>
-        <input type="text" id="country" name="country" placeholder="e.g., Finland"><br><br>
-        <label for="coordinates">Coordinates (optional, format: lat,lon):</label><br>
-        <input type="text" id="coordinates" name="coordinates" placeholder="e.g., 37.7749,-122.4194"><br><br>
-        <label for="figsize">Figure Size (width, height):</label><br>
-        <input type="text" id="figsize" name="figsize" value="10, 6"><br><br>
-        <label for="color">Color:</label><br>
-        <input type="text" id="color" name="color" value="blue"><br><br>
-        <label for="alpha">Alpha (transparency):</label><br>
-        <input type="text" id="alpha" name="alpha" value="0.6"><br><br>
-        <input type="submit" value="Generate Plot">
-    </form>
-    {% if plot_url %}
-        <h2>Generated Plot:</h2>
-        <img src="{{ plot_url }}" alt="GeoPandas Plot">
-    {% endif %}
-</body>
-</html>
-'''
 
 
 
@@ -474,7 +436,7 @@ def geopands():
     return render_template("tools.html")
 
 
-@app.route("/tools/geopands" , methods=["POST"])
+@app.route("/tools/geopands", methods=["GET", "POST"])
 def plot_world():
     plot_url = None
     if request.method == 'POST':
@@ -486,8 +448,9 @@ def plot_world():
             color = request.form.get('color', 'blue')
             alpha = float(request.form.get('alpha', '0.6'))
 
-            # Load the dataset
-            world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
+            # Load the dataset from local file
+            data_path = os.path.join('data', 'ne_110m_admin_0_countries.shp')
+            world = gpd.read_file(data_path)
             
             # Create the plot
             fig, ax = plt.subplots(1, 1, figsize=figsize)
@@ -495,7 +458,7 @@ def plot_world():
 
             # Highlight the specified country
             if country:
-                country_data = world[world['name'].str.contains(country, case=False)]
+                country_data = world[world['NAME'].str.contains(country, case=False)]
                 if not country_data.empty:
                     country_data.plot(ax=ax, color='red')
 
@@ -515,53 +478,39 @@ def plot_world():
         except Exception as e:
             return f"An error occurred: {e}", 500
 
-    return render_template_string(html_template, plot_url=plot_url)
 
 
 
 
 
-
-
-
-
-
-
-
-@app.route("/tools/geopands")
-def shapely():
-    return render_template("tools.html")
-
-
-
-
-@app.route('/tools/geopands', methods=['POST'])
-def check_point_in_polygon():
-    result = None
+@app.route('/tools/shapely', methods=['GET', 'POST'])
+def shapely_tools():
     if request.method == 'POST':
+        point_data = request.form.get('point')
+        polygon_data = request.form.get('polygon')
+
         try:
-            # Get user inputs
-            point_input = request.form.get('point')
-            polygon_input = request.form.get('polygon')
-
-            # Convert input strings to appropriate types
-            point_coords = tuple(map(float, point_input.split(',')))
-            polygon_coords = [tuple(map(float, coord.split(','))) for coord in polygon_input.split()]
-
-            # Create Point and Polygon objects
+            # Parse the point data
+            point_coords = tuple(map(float, point_data.split(',')))
             point = Point(point_coords)
+
+            # Parse the polygon data
+            polygon_coords = [tuple(map(float, coord.split(','))) for coord in polygon_data.split()]
             polygon = Polygon(polygon_coords)
 
             # Check if the point is within the polygon
-            result = point.within(polygon)
-            result = f"The point {point} is within the polygon {polygon}: {result}"
+            result = polygon.contains(point)
+
+            return render_template('tools.html', point=point.wkt, polygon=polygon.wkt, result=result)
         except Exception as e:
-            result = f"An error occurred: {e}"
+            return f"An error occurred: {e}", 400
 
-    return render_template("tools.html", result=result)
+    return render_template('index.html')
 
 
 
+
+## Harvesin
 
 @app.route("/tools/harvesin")
 def pyproj_get():
@@ -569,49 +518,37 @@ def pyproj_get():
 
 
 
-@app.route("/tools/harvesin" , methods = ["POST"])
+@app.route('/tools/haversine', methods=['GET', 'POST'])
 def pyproj():
-    try:
-        lon1 = float(request.form['lon1'])
-        lat1 = float(request.form['lat1'])
-        lon2 = float(request.form['lon2'])
-        lat2 = float(request.form['lat2'])
-        
-        point1 = (lat1, lon1)
-        point2 = (lat2, lon2)
-        
-        distance = haversine(point1, point2, unit=Unit.KILOMETERS)
-        
-        response_data = {
-            'longitude1': lon1,
-            'latitude1': lat1,
-            'longitude2': lon2,
-            'latitude2': lat2,
-            'distance_km': distance
-        }
-        
-        return Response(json.dumps(response_data), mimetype='application/json')
-    
-    except ValueError as e:
-        return Response(json.dumps({'error': str(e)}), mimetype='application/json')
+    if request.method == 'POST':
+        try:
+            lon1 = float(request.form['lon1'])
+            lat1 = float(request.form['lat1'])
+            lon2 = float(request.form['lon2'])
+            lat2 = float(request.form['lat2'])
+
+            point1 = (lat1, lon1)
+            point2 = (lat2, lon2)
+
+            distance = haversine(point1, point2, unit=Unit.KILOMETERS)
+
+            return render_template('tools.html', 
+                                   lon1=lon1, lat1=lat1, 
+                                   lon2=lon2, lat2=lat2, 
+                                   distance=distance)
+
+        except ValueError as e:
+            return render_template('tools.html', error=str(e))
+
+    return render_template('404.html')
     
 
 
 
 
-def generate_heatmap(heat_data):
-    # Create a map centered at a specific location
-    m = folium.Map(location=[39.8283, -98.5795], zoom_start=4)
+## Heat Map Creation
 
-    # Add heat map layer
-    HeatMap(heat_data).add_to(m)
-
-    # Save the map as a temporary HTML file
-    temp_file = 'heatmap_data.html'
-    m.save(temp_file)
-
-    return temp_file
-
+""" This Route Create HeatMap from Given Locations"""
 
 
 
@@ -638,7 +575,7 @@ def heatmap_post():
             heatmap_file = generate_heatmap(heat_data)
 
             # Return the heatmap file as a response
-            return send_file(heatmap_file, as_attachment=True, attachment_filename='heatmap_data.html')
+            return send_file(heatmap_file, as_attachment=True, download_name=f'{Filespath}/heatmap_data.html')
 
         except ValueError:
             return "Invalid input. Please enter numeric values."
@@ -646,61 +583,32 @@ def heatmap_post():
     return render_template('heatmap.html')
 
 
+def generate_heatmap(data):
+    # Initialize the map centered around a central point
+    m = folium.Map(location=[20, 0], zoom_start=2)
+
+    # Add heatmap layer
+    HeatMap(data).add_to(m)
+
+    # Save the map to a temporary file
+    tmp_dir = tempfile.mkdtemp()
+    heatmap_file = os.path.join(tmp_dir, "heatmap.html")
+    m.save(heatmap_file)
+
+    return heatmap_file
 
 
 
-@app.route("/variogram_kriging")
-def variogram_kriging():
-    return render_template("geostatistics.html" , username = username)
 
 
 
 
-@app.route("/variogram_kriging" , methods=["POST"])
-def geostatistics():
-    # Get the user input from the form
-    x_coords = request.form['X']
-    y_coords = request.form['Y']
-    values = request.form['Value']
-    
-    # Convert the input strings into lists of floats
-    x_coords = list(map(float, x_coords.split(',')))
-    y_coords = list(map(float, y_coords.split(',')))
-    values = list(map(float, values.split(',')))
 
-    # Ensure that the input lists have the same length
-    if not (len(x_coords) == len(y_coords) == len(values)):
-        return "Error: X, Y, and Value lists must be of the same length."
 
-    # Create a DataFrame from the user input
-    data = pd.DataFrame({
-        'X': x_coords,
-        'Y': y_coords,
-        'Value': values
-    })
 
-    # Save the data to a CSV file as Pygeostat works with files
-    data_file = 'data.csv'
-    data.to_csv(data_file, index=False)
 
-    # Load the data into a Pygeostat DataFile object
-    df = gs.DataFile(flname=data_file)
 
-    # Calculate and plot the variogram
-    variogram = gs.Variogram(df, coord_cols=['X', 'Y'], var_cols='Value', log=False)
-
-    # Fit a variogram model
-    variogram_model = variogram.fit_model()
-
-    # Perform ordinary kriging
-    krig_result = gs.Krige(df, variogram_model, coord_cols=['X', 'Y'], var_cols='Value')
-
-    # Save the kriging result to a CSV file
-    krig_result_file = 'krig_result.csv'
-    krig_result.to_csv(krig_result_file, index=False)
-
-    # Send the kriging result file as a downloadable file
-    return send_file(krig_result_file, as_attachment=True)
+#
 
 
 
@@ -749,117 +657,78 @@ def process_seismic():
 
 
 
+
+
+
+
+
+
+## Location Prediction
+
 @app.route('/location_prediction')
 def predict_loc():
     return render_template("predict_location.html" , username = username)
 
 
 
-# Load location data from CSV
-def load_location_data():
-    return pd.read_csv('location_data.csv')
+def read_csv(filename):
+    positions = []
+    with open(filename, mode='r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            positions.append({
+                "timestamp": row['timestamp'],
+                "latitude": float(row['latitude']),
+                "longitude": float(row['longitude'])
+            })
+    return positions
 
-# Define function for linear interpolation
-def interpolate_timestamp(loc, loc1, loc2, t1, t2):
-    """
-    Perform linear interpolation to predict timestamp at given latitude or longitude between two known locations.
+# Function to predict next position using Linear Regression
+def predict_next_position(historical_positions):
+    if len(historical_positions) < 2:
+        return np.mean([pos["latitude"] for pos in historical_positions]), np.mean([pos["longitude"] for pos in historical_positions])
     
-    Parameters:
-    - loc: Target latitude or longitude for prediction
-    - loc1, loc2: Coordinates (latitude, longitude) of known locations
-    - t1, t2: Timestamps of known locations (t1 < t < t2)
-    
-    Returns:
-    - Predicted timestamp at given latitude or longitude
-    """
-    delta_loc = (loc - loc1) / (loc2 - loc1)
-    interpolated_time = t1 + delta_loc * (t2 - t1)
-    return interpolated_time
+    timestamps = np.array(range(len(historical_positions))).reshape(-1, 1)
+    latitudes = np.array([pos["latitude"] for pos in historical_positions])
+    longitudes = np.array([pos["longitude"] for pos in historical_positions])
+
+    lat_model = LinearRegression().fit(timestamps, latitudes)
+    lon_model = LinearRegression().fit(timestamps, longitudes)
+
+    next_timestamp = np.array([[len(historical_positions)]])
+
+    next_latitude = lat_model.predict(next_timestamp)[0]
+    next_longitude = lon_model.predict(next_timestamp)[0]
+
+    return next_latitude, next_longitude
+
+# Construct the absolute path to the CSV file
+base_dir = os.path.abspath(os.path.dirname(__file__))
+csv_file = os.path.join(base_dir, '..', 'Databases', 'positions-p.csv')
+
+# Initialize with data from CSV file
+historical_positions = read_csv(csv_file)
 
 
 @app.route('/location_prediction', methods=['POST'])
 def predict_locations():
-    location_data = load_location_data()
-
-    # Read latitude and longitude from form input
-    input_latitude = float(request.form['latitude'])
-    input_longitude = float(request.form['longitude'])
-
-    # Find closest locations
-    for i in range(len(location_data) - 1):
-        loc1 = location_data[['latitude', 'longitude']].iloc[i]
-        loc2 = location_data[['latitude', 'longitude']].iloc[i + 1]
+    if request.method == 'POST':
+        timestamp = request.form['timestamp']
+        latitude = float(request.form['latitude'])
+        longitude = float(request.form['longitude'])
         
-        if loc1['latitude'] <= input_latitude <= loc2['latitude'] or loc1['longitude'] <= input_longitude <= loc2['longitude']:
-            t1 = datetime.strptime(location_data['timestamp'].iloc[i], '%Y-%m-%d %H:%M:%S')
-            t2 = datetime.strptime(location_data['timestamp'].iloc[i + 1], '%Y-%m-%d %H:%M:%S')
-            
-            # Interpolate timestamp
-            interpolated_time = interpolate_timestamp(input_latitude, loc1['latitude'], loc2['latitude'], t1, t2)
-
-            # Prepare HTML response
-            html_response = f"""
-            <html>
-            <head><title>Predicted Location</title></head>
-            <body>
-                <h1>Predicted Location</h1>
-                <p>Latitude: {input_latitude}</p>
-                <p>Longitude: {input_longitude}</p>
-                <p>Predicted Timestamp: {interpolated_time.strftime('%Y-%m-%d %H:%M:%S')}</p>
-            </body>
-            </html>
-            """
-            
-            # Create HTML response with Response object
-            response = make_response(html_response)
-            response.headers['Content-Type'] = 'text/html'
-            return response
-    
-    # Return error response if prediction fails
-    return make_response("<html><body><h1>Prediction Error</h1></body></html>", 400)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-@ app.route("/search", methods=["POST"])
-def Search_db():
-    jostoju = request.form["search"]
-    logger.info(Fore.YELLOW + "[ Info ] user Start to Search ans asnad")
-    cur = db.cursor()
-    cur.execute(f"SELECT * FROM map WHERE Name LIKE '%{jostoju}%'")
-    data1 = cur.fetchall()
-    cur.close()
-    # TODO : Edit template to show data
-    return render_template("search_result_asnad.html", data=data1)
-
-
-@ app.route("/user/db/remove", methods=["POST"])
-def remove_db():
-    try:
-        locname = request.form["name"]
-        cur = db.cursor()
-        cur.execute("DELETE FROM map WHERE name = %s ", locname)
-        data = db.commit()
-        cur.close()
-        logger.warning(
-            Fore.RED + "[ Warning ] Admin Delete one Row from map database")
-        return render_template("success.html")
-    except:
-        logger.warning(
-            Fore.RED + "[ Warning ] Can't Delete one Row from map database")
-        return render_template("404.html")
+        new_position = {
+            "timestamp": timestamp,
+            "latitude": latitude,
+            "longitude": longitude
+        }
+        historical_positions.append(new_position)
+        predicted_latitude, predicted_longitude = predict_next_position(historical_positions)
+        return render_template('predict_location.html', predicted_latitude=predicted_latitude, predicted_longitude=predicted_longitude)
+    else:
+        predicted_latitude = request.args.get('predicted_latitude')
+        predicted_longitude = request.args.get('predicted_longitude')
+        return render_template('predict_location.html', predicted_latitude=predicted_latitude, predicted_longitude=predicted_longitude)
 
 
 
@@ -906,21 +775,18 @@ def extract_map_info(file_path):
 
 
 
-def extract_map_info_from_csv(file_path):
-    map_info = []
-
-    with open(file_path, 'r', newline='') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            lat = float(row['latitude'])
-            lon = float(row['longitude'])
-            map_info.append({'latitude': lat, 'longitude': lon})
-
+def extract_map_info(file_path):
+    # Dummy function to simulate extracting map information from the text file
+    # Replace this with actual logic
+    with open(file_path, 'r') as f:
+        content = f.read()
+    # Example map_info extracted from file
+    map_info = {
+        "lines": content.split('\n')
+    }
     return map_info
 
-
-
-@ app.route("/analyzer/text", methods=["POST"])
+@app.route("/analyzer/text", methods=["POST"])
 def post_document_analyzer():
     file = request.files['textfile']
     if file.filename == '':
@@ -929,29 +795,37 @@ def post_document_analyzer():
     # Check if the file is a text file
     if file and file.filename.endswith('.txt'):
         # Save the file to a temporary location
-        file_path = os.path.join('uploads', file.filename)
+        file_path = os.path.join(Filespath, file.filename)
         file.save(file_path)
 
         # Extract map information from the file
         map_info = extract_map_info(file_path)
 
-        # Delete the temporary file
+        # Delete the temporary file after extracting information
         os.remove(file_path)
 
         # Create a temporary file to store the map information
         with NamedTemporaryFile(mode='w', delete=False) as temp_file:
             # Write the map information to the temporary file
             json.dump(map_info, temp_file)
+            temp_file_name = temp_file.name
 
         # Return the temporary file as a response
-        return send_file(temp_file.name, as_attachment=True, attachment_filename='map_info.json', mimetype='application/json')
-    
+        return send_file(temp_file_name, as_attachment=True, mimetype='application/json')
+
     else:
         return "Invalid file format, please upload a text file (.txt)", 400
 
 
+def extract_map_info_from_csv(file_path):
+    # Dummy function to simulate extracting map information from the CSV file
+    # Replace this with actual logic
+    data = pd.read_csv(file_path)
+    # Example: assuming the CSV has 'latitude' and 'longitude' columns
+    map_info = data[['latitude', 'longitude']].to_dict(orient='records')
+    return map_info
 
-@ app.route("/analyzer/csv", methods=["POST"])
+@app.route("/analyzer/csv", methods=["POST"])
 def post_csv_analyzer():
     file = request.files['csvfile']
 
@@ -962,7 +836,7 @@ def post_csv_analyzer():
     # Check if the file is a CSV file
     if file and file.filename.endswith('.csv'):
         # Save the file to a temporary location
-        file_path = os.path.join('uploads', file.filename)
+        file_path = os.path.join(Filespath, file.filename)
         file.save(file_path)
 
         # Extract map information from the CSV file
@@ -978,20 +852,50 @@ def post_csv_analyzer():
             csv_writer.writeheader()
             # Write the map information to the temporary file
             csv_writer.writerows(map_info)
+            temp_file_name = temp_file.name
 
         # Return the temporary file as a response
-        return send_file(temp_file.name, as_attachment=True, attachment_filename='extracted_map_info.csv', mimetype='text/csv')
-    
+        return send_file(temp_file_name, as_attachment=True, attachment_filename='extracted_map_info.csv', mimetype='text/csv')
+
     else:
         return "Invalid file format, please upload a CSV file (.csv)", 400
 
+
 @app.route("/home")
 def home():
-    return render_template('index.html', 
-                           number_of_files=number_of_files(),
-                           number_of_excel_files=number_of_excel_files(),
-                           number_of_maps=number_of_maps(),
-                           number_of_modules=number_of_modules() , username = username)
+    locations = [
+        {"name": "New York", "lat": 40.7128, "lon": -74.0060},
+        {"name": "London", "lat": 51.5074, "lon": -0.1278},
+        {"name": "Paris", "lat": 48.8566, "lon": 2.3522},
+        {"name": "Tokyo", "lat": 35.6895, "lon": 139.6917},
+        {"name": "Sydney", "lat": -33.8688, "lon": 151.2093},
+        {"name": "Dubai", "lat": 25.2048, "lon": 55.2708},
+        {"name": "Rome", "lat": 41.9028, "lon": 12.4964},
+        {"name": "Hong Kong", "lat": 22.3193, "lon": 114.1694},
+        {"name": "Berlin", "lat": 52.5200, "lon": 13.4050},
+        {"name": "Istanbul", "lat": 41.0082, "lon": 28.9784},
+    ]
+    # Create a Folium map centered on the first location
+    center_lat, center_lon = locations[0]["lat"], locations[0]["lon"]
+    map = folium.Map(location=[center_lat, center_lon], zoom_start=2)
+
+    # Add markers for each location
+    for loc in locations:
+        name = loc["name"]
+        lat, lon = loc["lat"], loc["lon"]
+        folium.Marker([lat, lon], popup=name).add_to(map)
+
+    # Save the map as an HTML string
+    map_html = map._repr_html_()
+    return render_template(
+        "index.html",
+        username=current_user.id,
+        number_of_files=number_of_files(),
+        number_of_excel_files=number_of_excel_files() , 
+        map_html=map_html , 
+        localtime = localtime
+
+    )
 
 
 
