@@ -55,12 +55,18 @@ from shapely.geometry import Point, Polygon
 import requests
 import datetime
 from sklearn.linear_model import LinearRegression
+from flask_talisman import Talisman
+
+
+
 
 
 plt.switch_backend('Agg')
 
 
 app = Flask(__name__)
+talisman = Talisman(app)
+
 
 username = getpass.getuser()  # Get username of system
 
