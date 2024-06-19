@@ -51,7 +51,7 @@
 					</li>
 
 
-					<li class="sidebar-item ">
+					<li class="sidebar-item active">
 						<a class="sidebar-link" href="/heatmap">
 							<i class="align-middle me-2" data-feather="plus"></i> <span
 								class="align-middle">HeatMap</span>
@@ -70,13 +70,6 @@
 						<a class="sidebar-link" href="/location_prediction">
 							<i class="align-middle me-2" data-feather="plus"></i> <span
 								class="align-middle">Location Prediction</span>
-						</a>
-					</li>
-
-					<li class="sidebar-item">
-						<a class="sidebar-link" href="/variogram_kriging">
-							<i class="align-middle me-2" data-feather="plus"></i> <span
-								class="align-middle"> Variogram Modeling&Kriging</span>
 						</a>
 					</li>
 
@@ -148,170 +141,105 @@
 					<div class="row">
 						<div class="col-md-12 col-lg-12">
 							<div class="card">
-								<div class="card-header">
-									<h5 class="card-title">Headers</h5>
-									<h6 class="card-subtitle text-	muted">
-										Info - Install - Remove</h6>
-								</div>
 								<div class="card-body">
-									<h1>INFO</h1><br>
-									<h3>Ubuntu</h3>
-									<h5 class="text-muted">Ubuntu is a Linux distribution based on Debian and composed
-										mostly of free and
-										open-source software. Ubuntu is officially released in three editions: Desktop,
-										Server, and Core for Internet of things devices and robots. All the editions can
-										run on the computer alone, or in a virtual machine.Ubuntu Linux is the most
-										popular open source operating system. There are many reasons to use Ubuntu Linux
-										that make it a worthy Linux distro. Apart from being free and open source, it’s
-										highly customizable and has a Software Center full of apps.</h5>
+									<h1>Geopy</h1><br>
+									
+									<h5 class="text-muted"> Geopy is a Python library that provides easy access to various geocoding services and other geographic data sources. It's particularly useful for developers who need to convert addresses into geographical coordinates (latitude and longitude) and vice versa.</h5>
 									<p class="text-muted">Base of This app Helps for data scientists to add marks to
 										maps.This mission Done with python and follium.python and pandas is base tools
 										of data scientists for working with Data and Folium is pacjage of python to
 										working with maps.This app Read Excel File With pandas and Get Defined points in
 										Excel File and Show it in maps.This maps save with html File type and Yoy can
 										Show in in App or web base systems</p>
-									<h3>Python</h3>
-									<p class="text-muted">Python is a high-level, interpreted, general-purpose
-										programming language. Its design philosophy emphasizes code readability with the
-										use of significant indentation. Python is dynamically-typed and
-										garbage-collected. It supports multiple programming paradigms, including
-										structured, object-oriented and functional programming. It is often described as
-										a "batteries included" language due to its comprehensive standard library. Guido
-										van Rossum began working on Python in the late 1980s as a successor to the ABC
-										programming language and first released it in 1991 as Python 0.9.0. Python 2.0
-										was released in 2000 and introduced new features such as list comprehensions,
-										cycle-detecting garbage collection, reference counting, and Unicode support.
-										Python 3.0, released in 2008, was a major revision that is not completely
-										backward-compatible with earlier versions. Python 2 was discontinued with
-										version 2.7.18 in 2020. Python consistently ranks as one of the most popular
-										programming languages</p>
-									<h3>Pandas</h3>
-									<p class="text-muted">Python is a high-level, interpreted, general-purpose
-										programming language. Its design philosophy emphasizes code readability with the
-										use of significant indentation. Python is dynamically-typed and
-										garbage-collected. It supports multiple programming paradigms, including
-										structured, object-oriented and functional programming. It is often described as
-										a "batteries included" language due to its comprehensive standard library. Guido
-										van Rossum began working on Python in the late 1980s as a successor to the ABC
-										programming language and first released it in 1991 as Python 0.9.0. Python 2.0
-										was released in 2000 and introduced new features such as list comprehensions,
-										cycle-detecting garbage collection, reference counting, and Unicode support.
-										Python 3.0, released in 2008, was a major revision that is not completely
-										backward-compatible with earlier versions. Python 2 was discontinued with
-										version 2.7.18 in 2020. Python consistently ranks as one of the most popular
-										programming languages
+									<p>
+
+										Supported Geocoders
+										Geopy supports various geocoding services including:
+
+										Nominatim (OpenStreetMap)
+										Google Geocoding API
+										Bing Maps API
+										Here Geocoding API
+										Yandex Geocoder API
+										and more...
 									</p>
-									<h3>Folium</h3>
+									<h1>Geopandas</h1><br>
+									<p class="text-muted">Geopandas is a Python library that extends the capabilities of pandas to allow spatial operations on geometric types. It combines the capabilities of pandas and Shapely, providing tools to manage and analyze geospatial data in a similar way to pandas.</p>
+									<p>Reading Geospatial Data
+										GeoPandas can read various geospatial data formats (like shapefiles, GeoJSON, etc.)</p>
+										<p>Plotting Geospatial Data
+											You can easily plot geospatial data using the plot method</p>
+											<p>Creating Geospatial Data
+												You can create GeoDataFrames from scratch</p>
+												<p>Spatial Operations
+													GeoPandas supports various spatial operations like intersection, union, difference, and spatial joins</p>
+									<h1>Shapely</h1><br>
+									<p class="text-muted">Shapely is a Python library for the manipulation and analysis of planar geometric objects. It is particularly useful for performing geometric operations such as union, intersection, difference, and distance computations on various geometric shapes. Shapely provides a robust way to handle geometries in a Cartesian plane using simple and intuitive operations.
+									</p>
+									<p>Creating Geometric Objects
+										Shapely provides several geometric objects such as Point, LineString, Polygon, etc</p>
+									<p>Geometric Operations
+										Shapely supports a wide range of geometric operations</p>
+										<p>Measuring Distances and Areas
+											Shapely can also compute distances, lengths, and areas</p>
+											<p>Working with Collections
+												Shapely also supports geometric collections like MultiPoint, MultiLineString, and MultiPolygon</p>
+									<h1>Harvesin</h1> <br>
 									<p class="text-muted">
 
-										folium makes it easy to visualize data that’s been manipulated in Python on an
-										interactive leaflet map. It enables both the binding of data to a map for
-										choropleth visualizations as well as passing rich vector/raster/HTML
-										visualizations as markers on the map.
+										The Haversine formula is a mathematical formula used to calculate the shortest distance between two points on the surface of a sphere, given their longitudes and latitudes. This is particularly useful for geospatial applications where distances between geographical points need to be calculated.
 
 									</p>
-									<h2>OS Tools</h2><br>
-									<h4>Clamav</h4>
+									<p>
+										Once installed, you can use the Haversine library to calculate the distance between two points given their latitude and longitude.
+									</p>
+									
+									<h1>Location Prediction</h1><br>
 
-									<p class="text-muted">Clam AntiVirus is a free, open-source, cross-platfom
-										antimalware toolkit able to detect many types of malware, including viruses. It
-										was developed for Unix and has third party versions available for AIX, BSD,
-										HP-UX, Linux, macOS, OpenVMS, OSF and Solaris. As of version 0.97.5, ClamAV
-										builds and runs on Microsoft Windows</p>
+									<p class="text-muted">Prediction Using Linear Regression
+										The prediction functionality in your code uses linear regression to estimate the next geographical location (latitude and longitude) based on historical positions. Here’s a detailed breakdown of how this works:
+										
+										What is Linear Regression?
+										Linear regression is a statistical method used to model the relationship between a dependent variable and one or more independent variables. It assumes a linear relationship between the variables.
+										
+										In this context, we use linear regression to model the relationship between the timestamp (independent variable) and the latitude and longitude (dependent variables).
+										
+										How the Prediction Function Works
+										Historical Positions:
+										
+										The historical_positions list stores dictionaries with timestamp, latitude, and longitude.
+										Data Preparation:
+										
+										Timestamps are converted into a range of integers to serve as the independent variable for linear regression.
+										Latitude and longitude values are extracted as dependent variables.
+										Training the Model:
+										
+										Two separate linear regression models are trained: one for latitude and one for longitude.
+										The models are trained using the historical timestamps as the feature and latitude/longitude as the target.
+										Making Predictions:
+										
+										The next timestamp is predicted as one step ahead of the last timestamp in the historical data.
+										The trained models predict the next latitude and longitude based on this next timestamp.</p>
 
 
-									<h4>RKhunter</h4>
+									<h1>File Analyzer</h1><br>
 
-									<p class="text-muted">rkhunter is a Unix-based tool that scans for rootkits,
-										backdoors and possible local exploits. It does this by comparing SHA-1 hashes of
-										important files with known good ones in online databases, searching for default
-										directories, wrong permissions, hidden files, suspicious strings in kernel
-										modules, and special tests for Linux and FreeBSD.
+									<p class="text-muted">This documentation provides detailed information on the Analyze functionality within your Flask application, which processes uploaded text and CSV files to extract and return geographical data (latitude and longitude).
 
 
 									</p>
 
-									<h4>Linux malwareDetect</h4>
+									<p>The Analyze functionality consists of:
 
-									<p class="text-muted">Maldet is a commonly used abbreviation for Linux Malware
-										Detect (LMD), a malware scanner for Linux released under the GNU GPLv2 license.
-									</p>
+										A route to render the analyzer page.
+										Routes to handle the analysis of uploaded text and CSV files.
+										Helper functions to extract map information from the uploaded files.</p>
 
 
-									<h4>Lynis</h4>
-
-									<p class="text-muted">Lynis is an extensible security audit tool for computer
-										systems running Linux, FreeBSD, macOS, OpenBSD, Solaris, and other Unix
-										derivatives</p>
-
-									<h4>MariaDB</h4>
-									<p class="text-muted">MariaDB is a community-developed, commercially supported fork
-										of the MySQL relational database management system, intended to remain free and
-										open-source software under the GNU General Public License. Development is led by
-										some of the original developers of MySQL, who forked it due to concerns over its
-										acquisition by Oracle Corporation in 2009.</p>
-								</div>
 							</div>
 
 
-							<div class="card">
-								<div class="card-header">
-									<h5 class="card-title">Headers</h5>
-								</div>
-								<div class="card-body">
-									<h1>Remove</h1>
-									<p class="text-muted">
-										Remove app From System
-									<h3>Python(app-packages)</h3>
-									<p class="text-muted">
-										$ sudp pip uninstall -r requirements.txt
-									</p>
 
-									<h2>OS Tools</h2><br>
-									<h4>Clamav</h4>
-
-									<p class="text-muted">Open Terminal and Enter this command:</p>
-									<p class="text-muted">$ sudo apt remove clamav clamav-daemon -y</p>
-
-									<h4>RKhunter</h4>
-
-									<p class="text-muted">
-
-										$ sudo apt remove rkhunter -y
-
-									</p>
-
-									<h4>Linux malwareDetect</h4>
-
-									<p class="text-muted">
-										$ sudo rm -rf maldet*
-									</p>
-
-
-									<h4>Lynis</h4>
-
-									<p class="text-muted">
-										$ sudo apt remove lynis -y
-									</p>
-
-									<h4>MariaDB</h4>
-									<p class="text-muted">
-										$ sudo apt remove mariadb-server
-									</p>
-								</div>
-							</div>
-							<div class="card">
-								<div class="card-header">
-									<h5 class="card-title">About US</h5>
-									<h6 class="card-subtitle text-muted">
-										septa
-									</h6>
-								</div>
-								<div class="card-body">
-									<p class="text-primary">This Line For Septa Info</p>
-
-								</div>
-							</div>
 
 						</div>
 
@@ -334,6 +262,14 @@
 								</li>
 								<li class="list-inline-item">
 									<a class="text-muted" href="https://github.com/KooshaYeganeh/KYGnus_Map" target="_blank">GitHub</a>
+								</li>
+
+								<li class="list-inline-item">
+									<a class="text-muted" href="#" target="_blank">KYGnus</a>
+								</li>
+
+								<li class="list-inline-item">
+									<a class="text-muted" href="#" target="_blank">septa</a>
 								</li>
 
 							</ul>
