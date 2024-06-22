@@ -157,3 +157,14 @@ sudo docker build -t kygnus_map .
 ```
 sudo docker run --rm -p 8080:80 kygnus_map
 ```
+
+
+
+
+
+
+
+## Download List
+
+ - https://git.io/GeoLite2-City.mmdb
+ - https://github.com/bahar/WorldCityLocations/archive/refs/heads/master.zip
