@@ -56,7 +56,11 @@ import requests
 import datetime
 from sklearn.linear_model import LinearRegression
 from flask_talisman import Talisman
-
+from flask import Flask, jsonify
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
 
 
 
@@ -717,24 +721,57 @@ historical_positions = read_csv(csv_file)
 
 
 @app.route('/location_prediction', methods=['POST'])
-def predict_locations():
-    if request.method == 'POST':
-        timestamp = request.form['timestamp']
-        latitude = float(request.form['latitude'])
-        longitude = float(request.form['longitude'])
-        
-        new_position = {
-            "timestamp": timestamp,
-            "latitude": latitude,
-            "longitude": longitude
-        }
-        historical_positions.append(new_position)
-        predicted_latitude, predicted_longitude = predict_next_position(historical_positions)
-        return render_template('predict_location.html', predicted_latitude=predicted_latitude, predicted_longitude=predicted_longitude)
-    else:
-        predicted_latitude = request.args.get('predicted_latitude')
-        predicted_longitude = request.args.get('predicted_longitude')
-        return render_template('predict_location.html', predicted_latitude=predicted_latitude, predicted_longitude=predicted_longitude)
+def train_models():
+    # Load the data, and skip any non-numeric rows
+    data = pd.read_csv('location_data.csv', header=None, names=['latitude', 'longitude'])
+    
+    # Remove non-numeric rows
+    data = data[pd.to_numeric(data['latitude'], errors='coerce').notnull()]
+    data = data[pd.to_numeric(data['longitude'], errors='coerce').notnull()]
+    
+    # Convert the latitude and longitude to numeric
+    data['latitude'] = pd.to_numeric(data['latitude'])
+    data['longitude'] = pd.to_numeric(data['longitude'])
+    
+    # Create features (X) and labels (y)
+    X = data[['latitude', 'longitude']].shift(1).dropna()  # Features: previous locations
+    y_latitude = data['latitude'][1:]  # Labels: next latitudes
+    y_longitude = data['longitude'][1:]  # Labels: next longitudes
+
+    # Ensure indices align correctly after shifting
+    y_latitude.reset_index(drop=True, inplace=True)
+    y_longitude.reset_index(drop=True, inplace=True)
+    X.reset_index(drop=True, inplace=True)
+
+    # Split the data into training and testing sets
+    X_train, X_test, y_lat_train, y_lat_test = train_test_split(X, y_latitude, test_size=0.2, random_state=42)
+    _, _, y_long_train, y_long_test = train_test_split(X, y_longitude, test_size=0.2, random_state=42)
+
+    # Train models for latitude and longitude prediction
+    lat_model = RandomForestRegressor(n_estimators=100, random_state=42)
+    lon_model = RandomForestRegressor(n_estimators=100, random_state=42)
+
+    # Fit the models
+    lat_model.fit(X_train, y_lat_train)
+    lon_model.fit(X_train, y_long_train)
+
+    return lat_model, lon_model, data
+
+# Load models and data once when the app starts
+lat_model, lon_model, data = train_models()
+
+# Flask route for predicting the next location
+@app.route('/predict_next_location')
+def predict_next_location():
+    try:
+        # Predict the next location based on the last known position
+        next_lat = lat_model.predict([data.iloc[-1].values])
+        next_lon = lon_model.predict([data.iloc[-1].values])
+
+        # Return the prediction as JSON
+        return render_template("predict_location.html" , predicted_latitude = next_lat[0], predicted_longitude = next_lon[0])
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 

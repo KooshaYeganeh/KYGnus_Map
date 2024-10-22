@@ -32,58 +32,24 @@
 					<div class="d-table-cell align-middle">
 
 						<div class="text-center mt-4">
-							<h1 class="h2">Predict Location</h1>
+							<h1 class="h2">Predicted Location</h1>
 							<p class="lead">
-								Give me Locations and I Try to Predict Locations
+								if Place a file named "location_data.csv" in the app path and then load the page.
 							</p>
-							<p style="color: #2F4F4F;">Note : Update Database with your Locations</p>
+							
 						</div>
-
-
-
-								
-						<form action="/location_prediction" method="post">
-							
-								
-								<div class="mb-3">
-									<label for="timestamp">Timestamp:</label>
-									
-									<input class="form-control form-control-lg" type="text" name="timestamp" placeholder="2023-01-01 12:00:00" />
-								</div> 
-								
-
-								<div class="mb-3">
-									<label for="latitude">Latitude:</label>
-									<input class="form-control form-control-lg" type="text" name="latitude" placeholder="40.7128" />
-								</div>
-								
-
-
-								<div class="mb-3">
-									<label for="longitude">Longitude:</label>
-									<input class="form-control form-control-lg" type="text" name="longitude" placeholder="-74.0060" />
-								</div>
-								
-						
-
-								<button type="submit" class="btn btn-primary btn-lg btn-block">Start Predict</button>
-
-
-						</form> <br><br>
-								
-							
-								
 								
 							<div class="row">
 
 								<div class="card">
 									
 									<div class="card-body">
-										{% if predicted_latitude is not none and predicted_longitude is not none %}
+										
 										<h3>Predicted Next Position</h3>
 										<p>Latitude: {{ predicted_latitude }}</p>
 										<p>Longitude: {{ predicted_longitude }}</p>
-										{% endif %}
+										<p> {{ predicted_latitude }},{{ predicted_longitude }}</p>
+		
 									</div>
 								</div>
 

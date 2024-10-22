@@ -2,7 +2,8 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+location_data.csv
+test_terminal.py
 # C extensions
 *.so
 
