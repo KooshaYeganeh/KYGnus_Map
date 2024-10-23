@@ -20,7 +20,49 @@
 	<link href="../static/css/app.css" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
-
+<style>
+	body {
+		font-family: Arial, sans-serif;
+		background-color: #f4f4f4;
+		margin: 20px;
+		padding: 20px;
+		border-radius: 10px;
+		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	}
+	h1 {
+		color: #333;
+	}
+	h2 {
+		color: #555;
+	}
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		margin-top: 20px;
+		background-color: #fff;
+		border-radius: 8px;
+		overflow: hidden;
+	}
+	th, td {
+		padding: 12px;
+		text-align: center;
+		border-bottom: 1px solid #ddd;
+	}
+	th {
+		background-color: #4CAF50;
+		color: white;
+		font-weight: bold;
+	}
+	tr:hover {
+		background-color: #f1f1f1;
+	}
+	tr:nth-child(even) {
+		background-color: #f9f9f9;
+	}
+	tr:nth-child(odd) {
+		background-color: #ffffff;
+	}
+</style>
 <body>
 	<div class="wrapper">
 		<nav id="sidebar" class="sidebar js-sidebar">
@@ -148,24 +190,6 @@
 
 
 
-
-							<div class="col-12 col-md-12">
-								<form action="/analyzer/text" method="post"
-									enctype="multipart/form-data">
-									<div class="card">
-										<div class="card-header">
-											<h5 class="card-title mb-0">File Upload</h5>
-										</div>
-										<div class="card-body">
-											<p class="card-text">Upload Text File to Analyze Map Information </p>
-											<input type="file" name="textfile" class="form-control"
-												id="customFile" /><br>
-											<button type="submit" class="btn btn-info">START Analyze</button>
-										</div>
-									</div>
-							</div>
-
-
 							<div class="col-12 col-md-12">
 								<form action="/analyzer/csv" method="post"
 									enctype="multipart/form-data">
@@ -175,14 +199,35 @@
 										</div>
 										<div class="card-body">
 											<p class="card-text">Upload CSV File to Analyze Map Information </p>
-											<input type="file" name="csv_file" class="form-control"
+											<input type="file" name="csvfile" class="form-control"
 												id="customFile" /><br>
 											<button type="submit" class="btn btn-info">START Analyze</button>
 										</div>
 									</div>
+								</form>
 							</div>
+
+
+							<div class="row mt-4">
+								<div class="card shadow-lg">
+									<div class="card-body">
+										<h3>Extracted Map Information</h3>
+							{% if map_info %}
+							<table>
+								<tr>
+									<th>Latitude</th>
+									<th>Longitude</th>
+								</tr>
+								{% for item in map_info %}
+									<tr>
+										<td>{{ item.latitude }}</td>
+										<td>{{ item.longitude }}</td>
+									</tr>
+								{% endfor %}
+							</table>
+							<br>
+						{% endif %}
 						</div>
-						</form>
 					</div>
 				</main>
 

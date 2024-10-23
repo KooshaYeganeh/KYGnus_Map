@@ -2,107 +2,193 @@
 <html lang="en">
 
 <head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<meta name="description" content="Responsive Admin &amp; Dashboard Template based on Bootstrap 5">
-	<meta name="author" content="AdminKit">
-	<meta name="keywords"
-		content="adminkit, bootstrap, bootstrap 5, admin, dashboard, template, responsive, css, sass, html, theme, front-end, ui kit, web">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Responsive Admin &amp; Dashboard Template based on Bootstrap 5">
+    <meta name="author" content="AdminKit">
+    <meta name="keywords"
+        content="adminkit, bootstrap, bootstrap 5, admin, dashboard, template, responsive, css, sass, html, theme, front-end, ui kit, web">
 
-	<link rel="preconnect" href="https://fonts.gstatic.com">
-	<link rel="shortcut icon" href="img/icons/icon-48x48.png" />
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="shortcut icon" href="img/icons/icon-48x48.png" />
+    <link rel="canonical" href="https://demo-basic.adminkit.io/pages-sign-up.html" />
 
-	<link rel="canonical" href="https://demo-basic.adminkit.io/pages-sign-up.html" />
+    <title>Predict Location</title>
 
-	<title>Predict Location</title>
+    <link href="../static/css/app.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-	<link href="../static/css/app.css" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #8aafd4;
+            font-family: 'Inter', sans-serif;
+        }
 
+        h1.h2 {
+            font-weight: 600;
+            color: #333;
+        }
 
+        .lead {
+            font-size: 1.1rem;
+            color: #777;
+        }
+
+        .card {
+            border-radius: 12px;
+            background: #fff;
+            border: none;
+        }
+
+        .card-title {
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 15px;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background-color: #1e40af;
+            border: none;
+            padding: 12px;
+            font-size: 1rem;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #1e3a8a;
+        }
+
+        pre {
+            background-color: #f3f4f6;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .invalid-feedback {
+            font-size: 0.9rem;
+            color: #e53e3e;
+        }
+
+        .shadow-lg {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .text-center {
+            margin-bottom: 1rem;
+        }
+
+        p {
+            color: #4a5568;
+        }
+
+        .text-success {
+            color: #16a34a !important;
+        }
+    </style>
 </head>
 
-<body style="background-color:#F8F8FF;">
-	<main class="d-flex w-100">
-		<div class="container d-flex flex-column">
-			<div class="row vh-100">
-				<div class="col-sm-10 col-md-8 col-lg-6 mx-auto d-table h-100">
-					<div class="d-table-cell align-middle">
+<body>
+    <main class="d-flex w-100">
+        <div class="container d-flex flex-column">
+            <div class="row vh-100">
+                <div class="col-sm-10 col-md-8 col-lg-6 mx-auto d-table h-100">
+                    <div class="d-table-cell align-middle">
+                        <div class="text-center mt-4">
+                            <h1 class="h2">Predicted Location</h1>
+                            <p class="lead">
+                                Upload your location data file (Excel) to predict the next position.
+                            </p>
+                        </div>
 
-						<div class="text-center mt-4">
-							<h1 class="h2">Predicted Location</h1>
-							<p class="lead">
-								if Place a file named "location_data.csv" in the app path and then load the page.
-							</p>
-							
-						</div>
-								
-							<div class="row">
+                        <div class="row">
+                            <div class="card shadow-lg">
+                                <div class="card-body">
+                                    <h3 class="card-title">Upload Location File</h3>
+                                    <form action="/predict_next_location/upload" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                                        <div class="mb-3">
+                                            <label for="formFile" class="form-label">Choose Excel File</label>
+                                            <input class="form-control" type="file" id="formFile" name="csvfile" required>
+                                            <div class="invalid-feedback">
+                                                Please upload a valid Excel file.
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-primary w-100" type="submit">Upload & Predict</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
 
-								<div class="card">
-									
-									<div class="card-body">
-										
-										<h3>Predicted Next Position</h3>
-										<p>Latitude: {{ predicted_latitude }}</p>
-										<p>Longitude: {{ predicted_longitude }}</p>
-										<p> {{ predicted_latitude }},{{ predicted_longitude }}</p>
-		
-									</div>
-								</div>
+                        <div class="row mt-4">
+                            <div class="card shadow-lg">
+                                <div class="card-body">
+                                    <h3 class="card-title">Sample CSV Format</h3>
+                                    <pre><code>latitude,longitude
+38.050355116770206,46.36325764297436
+38.05035617284893,46.3633166515713
+38.051327626373606,46.36418609918248
+38.052147127968105,46.36473326980873
+38.05392127524511,46.36622457798615
+38.0535580009705,46.36814503959592
+38.05378610363263,46.36116056748441
+38.05437747759428,46.360988906111466
+</code></pre>
+                                </div>
+                            </div>
+                        </div>
 
-							</div>
-								
+                        <div class="row mt-4">
+                            <div class="card shadow-lg">
+                                <div class="card-body">
+                                    <h3 class="card-title">Predicted Next Position</h3>
+                                    <p><strong>Latitude:</strong> {{ predicted_latitude }}</p>
+                                    <p><strong>Longitude:</strong> {{ predicted_longitude }}</p>
+                                    <p><strong>Coordinates:</strong> {{ predicted_latitude }}, {{ predicted_longitude }}</p>
+                                </div>
+                            </div>
+                        </div>
 
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 
-								
-
-								
-								
-
-
-							
-							
-
-
-					</div>
-				</div>
-			</div>
-		</div>
-	</main>
-
-	<script src="../static/js/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.getElementById('positionForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-
-            const data = {
-                timestamp: document.getElementById('timestamp').value,
-                latitude: parseFloat(document.getElementById('latitude').value),
-                longitude: parseFloat(document.getElementById('longitude').value)
-            };
-
-            fetch('/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
+        // Bootstrap form validation
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
             })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-                alert(`Predicted Next Position: Latitude ${data.predicted_latitude}, Longitude ${data.predicted_longitude}`);
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
-        });
+        })()
     </script>
-
-
 </body>
 
 </html>

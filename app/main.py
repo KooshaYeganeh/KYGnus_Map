@@ -61,7 +61,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
-
+from tempfile import NamedTemporaryFile
 
 
 
@@ -675,22 +675,22 @@ def process_seismic():
 
 ## Location Prediction
 
-@app.route('/location_prediction')
-def predict_loc():
-    return render_template("predict_location.html" , username = username)
+
+					
+@app.route("/predict_next_location")
+def predict_next_location():
+    return render_template("predict_location.html")
 
 
-
-def read_csv(filename):
+# Function to read positions from a CSV file (without timestamp)
+def read_csv(file):
+    data = pd.read_csv(file)
     positions = []
-    with open(filename, mode='r') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            positions.append({
-                "timestamp": row['timestamp'],
-                "latitude": float(row['latitude']),
-                "longitude": float(row['longitude'])
-            })
+    for index, row in data.iterrows():
+        positions.append({
+            "latitude": row['latitude'],
+            "longitude": row['longitude']
+        })
     return positions
 
 # Function to predict next position using Linear Regression
@@ -698,7 +698,7 @@ def predict_next_position(historical_positions):
     if len(historical_positions) < 2:
         return np.mean([pos["latitude"] for pos in historical_positions]), np.mean([pos["longitude"] for pos in historical_positions])
     
-    timestamps = np.array(range(len(historical_positions))).reshape(-1, 1)
+    timestamps = np.array(range(len(historical_positions))).reshape(-1, 1)  # Generate timestamps based on row index
     latitudes = np.array([pos["latitude"] for pos in historical_positions])
     longitudes = np.array([pos["longitude"] for pos in historical_positions])
 
@@ -712,66 +712,32 @@ def predict_next_position(historical_positions):
 
     return next_latitude, next_longitude
 
-# Construct the absolute path to the CSV file
-base_dir = os.path.abspath(os.path.dirname(__file__))
-csv_file = os.path.join(base_dir, '..', 'Databases', 'positions-p.csv')
-
-# Initialize with data from CSV file
-historical_positions = read_csv(csv_file)
-
-
-@app.route('/location_prediction', methods=['POST'])
-def train_models():
-    # Load the data, and skip any non-numeric rows
-    data = pd.read_csv('location_data.csv', header=None, names=['latitude', 'longitude'])
+# Route to upload the CSV file
+@app.route('/predict_next_location/upload', methods=['POST'])
+def upload_file():
+    file = request.files['csvfile']
     
-    # Remove non-numeric rows
-    data = data[pd.to_numeric(data['latitude'], errors='coerce').notnull()]
-    data = data[pd.to_numeric(data['longitude'], errors='coerce').notnull()]
+    # Check if the user has not selected a file
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+
+    # Handle CSV files
+    if file.filename.endswith('.csv'):
+        historical_positions = read_csv(file)
+    else:
+        return jsonify({'error': 'Invalid file type. Please upload a .csv file.'}), 400
     
-    # Convert the latitude and longitude to numeric
-    data['latitude'] = pd.to_numeric(data['latitude'])
-    data['longitude'] = pd.to_numeric(data['longitude'])
+    # Predict next position
+    next_latitude, next_longitude = predict_next_position(historical_positions)
+
+    return render_template("predict_location.html", predicted_latitude=next_latitude, predicted_longitude=next_longitude)
     
-    # Create features (X) and labels (y)
-    X = data[['latitude', 'longitude']].shift(1).dropna()  # Features: previous locations
-    y_latitude = data['latitude'][1:]  # Labels: next latitudes
-    y_longitude = data['longitude'][1:]  # Labels: next longitudes
 
-    # Ensure indices align correctly after shifting
-    y_latitude.reset_index(drop=True, inplace=True)
-    y_longitude.reset_index(drop=True, inplace=True)
-    X.reset_index(drop=True, inplace=True)
 
-    # Split the data into training and testing sets
-    X_train, X_test, y_lat_train, y_lat_test = train_test_split(X, y_latitude, test_size=0.2, random_state=42)
-    _, _, y_long_train, y_long_test = train_test_split(X, y_longitude, test_size=0.2, random_state=42)
 
-    # Train models for latitude and longitude prediction
-    lat_model = RandomForestRegressor(n_estimators=100, random_state=42)
-    lon_model = RandomForestRegressor(n_estimators=100, random_state=42)
 
-    # Fit the models
-    lat_model.fit(X_train, y_lat_train)
-    lon_model.fit(X_train, y_long_train)
 
-    return lat_model, lon_model, data
 
-# Load models and data once when the app starts
-lat_model, lon_model, data = train_models()
-
-# Flask route for predicting the next location
-@app.route('/predict_next_location')
-def predict_next_location():
-    try:
-        # Predict the next location based on the last known position
-        next_lat = lat_model.predict([data.iloc[-1].values])
-        next_lon = lon_model.predict([data.iloc[-1].values])
-
-        # Return the prediction as JSON
-        return render_template("predict_location.html" , predicted_latitude = next_lat[0], predicted_longitude = next_lon[0])
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
 
 
@@ -802,106 +768,45 @@ def analyzer():
 # TODO : check Document File Type and Format and Extensions and Interior of File for Unwanted Data
 
 
-def extract_map_info(file_path):
-    map_info = []
-
-    with open(file_path, 'r') as file:
-        for line in file:
-            # Assuming latitude and longitude are in the format "Lat: xx.xx, Lon: xx.xx"
-            match = re.search(r'Lat: ([\d.-]+), Lon: ([\d.-]+)', line)
-            if match:
-                lat = float(match.group(1))
-                lon = float(match.group(2))
-                map_info.append({'latitude': lat, 'longitude': lon})
-    
-    return map_info
-
-
-
-def extract_map_info(file_path):
-    # Dummy function to simulate extracting map information from the text file
-    # Replace this with actual logic
-    with open(file_path, 'r') as f:
-        content = f.read()
-    # Example map_info extracted from file
-    map_info = {
-        "lines": content.split('\n')
-    }
-    return map_info
-
-@app.route("/analyzer/text", methods=["POST"])
-def post_document_analyzer():
-    file = request.files['textfile']
-    if file.filename == '':
-        return "Empty file", 400
-
-    # Check if the file is a text file
-    if file and file.filename.endswith('.txt'):
-        # Save the file to a temporary location
-        file_path = os.path.join(Filespath, file.filename)
-        file.save(file_path)
-
-        # Extract map information from the file
-        map_info = extract_map_info(file_path)
-
-        # Delete the temporary file after extracting information
-        os.remove(file_path)
-
-        # Create a temporary file to store the map information
-        with NamedTemporaryFile(mode='w', delete=False) as temp_file:
-            # Write the map information to the temporary file
-            json.dump(map_info, temp_file)
-            temp_file_name = temp_file.name
-
-        # Return the temporary file as a response
-        return send_file(temp_file_name, as_attachment=True, mimetype='application/json')
-
-    else:
-        return "Invalid file format, please upload a text file (.txt)", 400
-
 
 def extract_map_info_from_csv(file_path):
-    # Dummy function to simulate extracting map information from the CSV file
-    # Replace this with actual logic
     data = pd.read_csv(file_path)
-    # Example: assuming the CSV has 'latitude' and 'longitude' columns
-    map_info = data[['latitude', 'longitude']].to_dict(orient='records')
-    return map_info
+    # Assuming the CSV has 'latitude' and 'longitude' columns
+    if 'latitude' not in data.columns or 'longitude' not in data.columns:
+        raise ValueError("CSV must contain 'latitude' and 'longitude' columns.")
+    return data[['latitude', 'longitude']].to_dict(orient='records')
 
 @app.route("/analyzer/csv", methods=["POST"])
 def post_csv_analyzer():
-    file = request.files['csvfile']
+    csvfile = request.files['csvfile']
 
-    # Check if the file is empty
-    if file.filename == '':
-        return "Empty file", 400
+    if csvfile and csvfile.filename.endswith('.csv'):
+        file_path = os.path.join(Filespath, csvfile.filename)
+        csvfile.save(file_path)
 
-    # Check if the file is a CSV file
-    if file and file.filename.endswith('.csv'):
-        # Save the file to a temporary location
-        file_path = os.path.join(Filespath, file.filename)
-        file.save(file_path)
+        try:
+            map_info = extract_map_info_from_csv(file_path)
 
-        # Extract map information from the CSV file
-        map_info = extract_map_info_from_csv(file_path)
+            # Create a temporary file to store the map information in CSV format
+            with NamedTemporaryFile(mode='w', delete=False, newline='') as temp_file:
+                csv_writer = csv.DictWriter(temp_file, fieldnames=['latitude', 'longitude'])
+                csv_writer.writeheader()
+                csv_writer.writerows(map_info)
+                temp_file_name = temp_file.name
 
-        # Delete the temporary file
-        os.remove(file_path)
+            # Pass the extracted data to the analyzer template
+            return render_template("analyzer.html", username=username, map_info=map_info, csvfile=csvfile)
 
-        # Create a temporary file to store the map information in CSV format
-        with NamedTemporaryFile(mode='w', delete=False, newline='') as temp_file:
-            # Create a CSV writer object
-            csv_writer = csv.DictWriter(temp_file, fieldnames=['latitude', 'longitude'])
-            csv_writer.writeheader()
-            # Write the map information to the temporary file
-            csv_writer.writerows(map_info)
-            temp_file_name = temp_file.name
+        except Exception as e:
+            return Response(f"Error processing the CSV file: {str(e)}", status=500)
 
-        # Return the temporary file as a response
-        return send_file(temp_file_name, as_attachment=True, attachment_filename='extracted_map_info.csv', mimetype='text/csv')
 
-    else:
-        return "Invalid file format, please upload a CSV file (.csv)", 400
+
+
+
+
+
+
 
 
 @app.route("/home")
