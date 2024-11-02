@@ -69,7 +69,7 @@ plt.switch_backend('Agg')
 
 
 app = Flask(__name__)
-talisman = Talisman(app)
+
 
 
 username = getpass.getuser()  # Get username of system
@@ -351,30 +351,119 @@ def main_map():
 This is Basic map with Marker and Save File in templates Directory in templates/maps"""
 
 
-@ app.route("/createmap/map/marker", methods=["POST"])
+
+
+@app.route("/createmap/map/marker", methods=["POST"])
 def marker():
-    """ This route get excel File and insert marker on map"""
+    """ This route gets a CSV file and inserts markers on a map."""
     csv_file = request.files["csv_file"]
     zoom = request.form["zoom_start"]
+    
     if check_files(csv_file.filename):
-        print(check_files(csv_file.filename))
-        logger.info(
-            Fore.YELLOW + "[ Info ] check File Format for Security Reasons")
-        try:
-            locations = pd.read_csv(csv_file)
-            main_locations = locations[["Latitude", "Longitude", "Name"]]
-            map = folium.Map(location=[main_locations.Latitude.mean(
-            ), main_locations.Longitude.mean()], zoom_start=zoom, control_scale=True)
-            for index, location_info in main_locations.iterrows():
-                if folium.Marker([location_info["Latitude"], location_info["Longitude"]], popup=location_info["Name"]).add_to(map):
-                    map.save(f"./templates/maps/{csv_file.filename}.html")
-                    print("map Saved succesfully")
-            goal_path = os.path.join(
-                excel_marker_files_path, csv_file.filename)
-            csv_file.save(goal_path)  # the file save in Goal path
-            return redirect("/createmap")
-        except:
-            return Response("<html><body style='background-color:white;'><center ><h1 style='color:red;'> Can't Process Excel File !!!</h1><h2> Please Check File Type and Format Or Sure This File Design is True</center></html></body>")
+        logger.info("Checking file format for security reasons.")
+        
+        # Read the CSV file and validate it
+        locations = pd.read_csv(csv_file)
+        main_locations = locations[["Latitude", "Longitude", "Name"]]
+        
+        # Create the map centered around the mean latitude and longitude
+        map = folium.Map(
+            location=[main_locations["Latitude"].mean(), main_locations["Longitude"].mean()],
+            zoom_start=int(zoom),  # Ensure zoom is an integer
+            control_scale=True
+        )
+        
+        # Add markers to the map
+        for _, location_info in main_locations.iterrows():
+            folium.Marker(
+                [location_info["Latitude"], location_info["Longitude"]],
+                popup=location_info["Name"]
+            ).add_to(map)
+
+        # Check and create the 'maps' directory if it doesn't exist
+        map_directory = "./templates/maps/"
+        os.makedirs(map_directory, exist_ok=True)
+        
+        # Save the map as an HTML file
+        map_path = os.path.join("/tmp", f"save_marker.html")
+        map.save(map_path)
+        print("Map saved successfully.")
+        
+        # Save the uploaded CSV file to the desired location
+        goal_path = os.path.join(excel_marker_files_path, csv_file.filename)
+        csv_file.save(goal_path)
+        
+        return Response("""
+            <html>
+            <head>
+                <style>
+                    body {
+                        background-color: #e9ecef;
+                        font-family: Arial, sans-serif;
+                        color: #333;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .container {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        min-height: 100vh;
+                        padding: 20px;
+                    }
+                    .content {
+                        text-align: center;
+                        background-color: #ffffff;
+                        border-radius: 10px;
+                        padding: 40px;
+                        max-width: 600px;
+                        width: 100%;
+                        box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15);
+                    }
+                    h1 {
+                        color: #28a745;
+                        font-size: 32px;
+                        margin-bottom: 20px;
+                    }
+                    h2 {
+                        color: #555;
+                        font-size: 24px;
+                        margin-bottom: 30px;
+                    }
+                    .button {
+                        display: inline-block;
+                        background-color: #007bff;
+                        color: white;
+                        padding: 15px 30px;
+                        border: none;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-size: 18px;
+                        text-decoration: none;
+                        transition: background-color 0.3s;
+                        margin-top: 20px;
+                    }
+                    .button:hover {
+                        background-color: #0056b3;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="content">
+                        <h1>Map File Saved Successfully</h1>
+                        <h2>File Path: /tmp</h2>
+                        <a href="/createmap" class="button">Return</a>
+                    </div>
+                </div>
+            </body>
+            </html>
+        """)
+
+
+
+        # except:
+        #     return Response("<html><body style='background-color:white;'><center ><h1 style='color:red;'> Can't Process Excel File !!!</h1><h2> Please Check File Type and Format Or Sure This File Design is True</center></html></body>")
 
 
 # circular marker
@@ -398,13 +487,76 @@ def cmarker():
             ), main_locations.Longitude.mean()], zoom_start=zoom, control_scale=True)
             for index, location_info in main_locations.iterrows():
                 if folium.CircleMarker([location_info["Latitude"], location_info["Longitude"]], popup=location_info["Name"]).add_to(map):
-                    map.save(
-                        f"./templates/maps/{csv_file.filename}_circular.html")
+                    map.save("/tmp/map_circular.html")
                     print("map Saved succesfully")
             goal_path = os.path.join(
                 excel_marker_files_path, csv_file.filename)
-            csv_file.save(goal_path)  # the file save in Goal path
-            return redirect("/createmap")
+            return Response("""
+                <html>
+                <head>
+                    <style>
+                        body {
+                            background-color: #e9ecef;
+                            font-family: Arial, sans-serif;
+                            color: #333;
+                            margin: 0;
+                            padding: 0;
+                        }
+                        .container {
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            min-height: 100vh;
+                            padding: 20px;
+                        }
+                        .content {
+                            text-align: center;
+                            background-color: #ffffff;
+                            border-radius: 10px;
+                            padding: 40px;
+                            max-width: 600px;
+                            width: 100%;
+                            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15);
+                        }
+                        h1 {
+                            color: #28a745;
+                            font-size: 32px;
+                            margin-bottom: 20px;
+                        }
+                        h2 {
+                            color: #555;
+                            font-size: 24px;
+                            margin-bottom: 30px;
+                        }
+                        .button {
+                            display: inline-block;
+                            background-color: #007bff;
+                            color: white;
+                            padding: 15px 30px;
+                            border: none;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            font-size: 18px;
+                            text-decoration: none;
+                            transition: background-color 0.3s;
+                            margin-top: 20px;
+                        }
+                        .button:hover {
+                            background-color: #0056b3;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="content">
+                            <h1>Map File Saved Successfully</h1>
+                            <h2>File Path: /tmp</h2>
+                            <a href="/createmap" class="button">Return</a>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            """)
         except:
             return Response("<html><body style='background-color:white;'><center ><h1 style='color:red;'> Can't Process Excel File !!!</h1><h2> Please Check File Type and Format Or Sure This File Design is True</center></html></body>")
 
