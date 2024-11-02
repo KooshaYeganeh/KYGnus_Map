@@ -34,7 +34,7 @@
 						menu
 					</li>
 
-					<li class="sidebar-item">
+					<li class="sidebar-item active">
 						<a class="sidebar-link" href="/home">
 							<i class="align-middle" data-feather="sliders"></i> <span
 								class="align-middle">Dashboard</span>
@@ -43,7 +43,7 @@
 
 
 
-					<li class="sidebar-item active">
+					<li class="sidebar-item">
 						<a class="sidebar-link" href="/createmap">
 							<i class="align-middle me-2" data-feather="plus"></i> <span class="align-middle">Create
 								Map</span>
@@ -51,7 +51,7 @@
 					</li>
 
 
-					<li class="sidebar-item ">
+					<li class="sidebar-item">
 						<a class="sidebar-link" href="/heatmap">
 							<i class="align-middle me-2" data-feather="plus"></i> <span
 								class="align-middle">HeatMap</span>
@@ -67,11 +67,13 @@
 
 
 					<li class="sidebar-item">
-						<a class="sidebar-link" href="/location_prediction">
+						<a class="sidebar-link" href="/predict_next_location">
 							<i class="align-middle me-2" data-feather="plus"></i> <span
 								class="align-middle">Location Prediction</span>
 						</a>
 					</li>
+
+
 
 
 					<li class="sidebar-item">
@@ -192,7 +194,7 @@
 										<div class="card-body">
 											<p class="card-text">Upload Excel File to Create Marker.</p>
 											<input type="number" name="zoom_start" class="form-control"
-												placeholder="Insert Zoom Start">
+												placeholder="Insert Zoom Start - (2/3 or more)">
 											<input type="file" name="csv_file" class="form-control"
 												id="customFile" /><br>
 											<button type="submit" class="btn btn-success">Submit</button>
