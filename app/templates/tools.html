@@ -188,31 +188,27 @@
 									<div class="card">
 										<div class="card-header">
 											<h3 class="card-title mb-0">Geopandas</h3><br>
-											<p>GeoPandas is an open source project to make working with geospatial data in python easier. GeoPandas extends the datatypes used by pandas to allow spatial operations on geometric types. Geometric operations are performed by shapely. Geopandas further depends on fiona for file access and matplotlib for plotting.</p>
+											<p>GeoPandas is an open-source project to make working with geospatial data in Python easier. GeoPandas extends the datatypes used by pandas to allow spatial operations on geometric types. Geometric operations are performed by shapely. GeoPandas further depends on Fiona for file access and Matplotlib for plotting.</p>
 										</div>
 										
 										<div class="card-body">
-											<input type="text" name="country" class="form-control"
-												id="customFile" placeholder="country" /><br>
-												<input type="text" name="coordinates" class="form-control"
-												id="customFile" placeholder="coordinates" /><br>
-												<input type="text" name="figsize" class="form-control"
-												id="customFile"  placeholder="figsize"/><br>
-												<input type="text" name="color" class="form-control"
-												id="customFile" placeholder="color"/><br>
-												<input type="text" name="alpha" class="form-control"
-												id="customFile" placeholder="alpha" /><br>
+											<input type="text" name="country" class="form-control" placeholder="Enter country (e.g., USA)" /><br>
+											<input type="text" name="coordinates" class="form-control" placeholder="Enter coordinates (e.g., 34.0522,-118.2437)" /><br>
+											<input type="text" name="figsize" class="form-control" placeholder="Enter figure size (e.g., 10,5)" /><br>
+											<input type="text" name="color" class="form-control" placeholder="Enter color (e.g., blue or #RRGGBB)" /><br>
+											<input type="text" name="alpha" class="form-control" placeholder="Enter alpha value (0.0 to 1.0)" /><br>
 											<button type="submit" class="btn btn-primary">Submit</button>
-
 										</div>
 										<div class="card-header">
 											{% if plot_url %}
 											<h2>Generated Plot:</h2>
 											<img src="{{ plot_url }}" alt="Generated Plot" class="img-fluid">
-										{% endif %}
+											{% endif %}
 										</div>
 									</div>
 								</form>
+							</div>
+							
 
 
 
